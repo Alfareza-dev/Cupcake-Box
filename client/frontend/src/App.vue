@@ -69,7 +69,7 @@ function showErrorDetails(e) {
       statusMessage = 'Server error (500)'
       break
     case 502:
-      statusMessage = 'Bad Gateway, is PufferPanel running? (502)'
+      statusMessage = 'Bad Gateway, is Cupcake Box running? (502)'
       break
   }
 
@@ -219,9 +219,9 @@ function handleConfirm(title, ok, cancel) {
 
 <template>
   <div id="root" v-hotkey="['?', 'Shift+?']" :class="themeClasses" @hotkey="showHotkeys = !showHotkeys">
-    <topbar :class="allowSidebar ? 'sidebar-exists' : ''" :user="user" @toggleSidebar="sidebarClosed = !sidebarClosed" />
-    <sidebar v-if="allowSidebar" :closed="sidebarClosed" :right="!ltr" />
-    <main class="main" @click="maybeCloseSidebar()">
+    <topbar v-if="allowSidebar" class="sidebar-exists" :user="user" @toggleSidebar="sidebarClosed = !sidebarClosed" />
+    <sidebar v-if="allowSidebar" :closed="sidebarClosed" :right="!ltr" @navigate="maybeCloseSidebar()" />
+    <main :class="['main', !allowSidebar ? 'auth-main' : '']" @click="maybeCloseSidebar()">
       <router-view />
     </main>
     <overlay v-model="showError" :title="t('common.ErrorDetails')" closable>

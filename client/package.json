@@ -5,6 +5,7 @@
     "frontend"
   ],
   "scripts": {
+    "start": "yarn --cwd api build && yarn --cwd frontend start",
     "build": "yarn workspaces run build",
     "dev": "yarn workspaces run dev",
     "clean": "yarn workspaces run clean"

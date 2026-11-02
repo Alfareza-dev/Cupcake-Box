@@ -1,7 +1,6 @@
 @use "sass:map";
 @use "sass:list";
 
-
 // Breakpoints
 $breakpoints: (
   xs: (0px, 767px),
@@ -11,40 +10,35 @@ $breakpoints: (
 
 @mixin breakpoint($b) {
   $s: map.get($breakpoints, $b);
-  @media(min-width: list.nth($s, 1)) {
-    @content
+  @media (min-width: list.nth($s, 1)) {
+    @content;
   }
 }
 
 @mixin breakpoint-down($b) {
   $s: map.get($breakpoints, $b);
-  @media(max-width: list.nth($s, 2)) {
-    @content
+  @media (max-width: list.nth($s, 2)) {
+    @content;
   }
 }
 
 @mixin breakpoint-only($b) {
   $s: map.get($breakpoints, $b);
   @media (min-width: list.nth($s, 1)) and (max-width: list.nth($s, 2)) {
-    @content
+    @content;
   }
 }
-
 
 // Grid
 @mixin row {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   grid-gap: 1rem;
   gap: 1rem;
+  width: 100%;
   margin-left: auto;
   margin-right: auto;
-  // prevent adjusted font sizes from causing ui to grow too wide
-  max-width: calc(72 * 16px);
-  // detecting unscaled 1440p screens and similar situation
-  @media (min-aspect-ratio: 16/10) and (min-height: 1250px) {
-    max-width: calc(96 * 16px);
-  }
+  max-width: 1480px;
 }
 
 @mixin cols($cols, $breakpoint: null, $offset: null) {
@@ -60,15 +54,14 @@ $breakpoints: (
   }
 }
 
-
 // Lists
 @mixin baselist($absolute: false) {
   .list-header {
     margin: 0;
-    padding: 0.75em 0.5em;
+    padding: 0.65em 0.75em;
     display: flex;
     align-items: center;
-    transition: background 0.1s ease-in-out;
+    transition: background 0.12s ease;
 
     h1, h2, h3, h4, h5, h6 {
       margin-bottom: 0;
@@ -77,17 +70,18 @@ $breakpoints: (
 
   .list-item {
     margin: 0;
-    padding: 0.75em 0.5em;
+    padding: 0.6em 0.75em;
+    border-radius: 8px;
     display: flex;
     align-items: center;
-    transition: background 0.1s ease-in-out;
+    transition: background 0.12s ease, color 0.12s ease;
 
     a {
       color: var(--text);
     }
 
     .text, .title, .subline {
-      overflow: clip visible;
+      overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
       width: 100%;
@@ -95,23 +89,31 @@ $breakpoints: (
     }
 
     .subline {
-      font-size: 0.85em;
-      color: var(--text-disabled);
+      font-size: 0.825em;
+      color: var(--text-muted);
     }
   }
 
-  .active .list-item, .active.list-item, .list-item.clickable:hover, a .list-item:hover {
-    background-color: var(--primary-hover);
+  .active .list-item,
+  .active.list-item {
+    background-color: var(--accent-subtle, var(--primary-hover));
+    color: var(--accent-light, var(--primary));
+  }
+
+  .list-item.clickable:hover,
+  a .list-item:hover {
+    background-color: rgba(255, 255, 255, 0.045);
   }
 
   .list-item-icon {
-    margin-left: 0.05em;
-    margin-right: 0.5em;
+    margin-right: 0.65em;
+    display: inline-flex;
+    align-items: center;
     .icon {
       @if ($absolute) {
-        font-size: 28px;
+        font-size: 18px;
       } @else {
-        font-size: 1.75rem;
+        font-size: 1.25rem;
       }
     }
   }
@@ -119,7 +121,7 @@ $breakpoints: (
 
 html[dir="rtl"] .list-item .list-item-icon {
   margin-right: 0.1em;
-  margin-left: 0.5em;
+  margin-left: 0.65em;
 }
 
 @mixin gridlist {
@@ -132,39 +134,42 @@ html[dir="rtl"] .list-item .list-item-icon {
 
   .list-item {
     @include cols(12);
-    @include cols(4, md);
+    @include cols(6, md);
 
     a {
       color: var(--text);
     }
 
     .subline {
-      font-size: 0.85em;
-      color: var(--text-disabled);
+      font-size: 0.825em;
+      color: var(--text-muted);
     }
   }
 
-  .active .list-item, .active.list-item, .list-item.clickable:hover, a .list-item:hover {
-    background-color: var(--primary-hover);
+  .active .list-item,
+  .active.list-item,
+  .list-item.clickable:hover,
+  a .list-item:hover {
+    background-color: var(--accent-subtle, var(--primary-hover));
   }
 
   .list-item-icon {
-    margin-right: 0.5em;
+    margin-right: 0.65em;
     .icon {
-      font-size: 1.75rem;
+      font-size: 1.35rem;
     }
   }
 }
 
-
 // Card
 @mixin card {
-  @include raised;
-  margin-top: 24px;
-  padding: 1em;
+  margin-top: 16px;
+  padding: 1.25rem;
   border-radius: var(--border-radius);
   background-color: var(--background);
-  transition: background 0.1s ease-in-out;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+  transition: background 0.15s ease, border-color 0.15s ease;
 
   h1:first-child {
     margin-top: 0;
@@ -180,10 +185,9 @@ html[dir="rtl"] .list-item .list-item-icon {
   }
 }
 
-
 // Utility
 @mixin raised {
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.24);
 }
 
 .raised {
@@ -200,7 +204,7 @@ html[dir="rtl"] .list-item .list-item-icon {
 
 @mixin link {
   &:hover {
-    background-color: var(--primary-hover);
+    background-color: var(--accent-subtle, var(--primary-hover));
   }
 }
 
@@ -208,25 +212,8 @@ html[dir="rtl"] .list-item .list-item-icon {
   @include link;
 }
 
-// @mixin icon {
-//   // copied from mdi because it doesn't expose a mixin and extending causes trouble occasionally
-//   display: inline-block;
-//   font: normal normal normal #{$mdi-font-size-base}/1 '#{$mdi-font-name}';
-//   font-size: inherit;
-//   text-rendering: auto;
-//   line-height: inherit;
-//   -webkit-font-smoothing: antialiased;
-//   -moz-osx-font-smoothing: grayscale;
-// }
-
 @mixin high-contrast-mode {
   .mode-dark-highcontrast {
     @content;
-  }
-
-  .mode-auto {
-    @media (prefers-contrast: more) {
-      @content;
-    }
   }
 }

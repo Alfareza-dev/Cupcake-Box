@@ -2,7 +2,10 @@
 import { ref, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import AuthShell from '@/components/ui/AuthShell.vue'
 import TextField from '@/components/ui/TextField.vue'
+import Icon from '@/components/ui/Icon.vue'
+import Loader from '@/components/ui/Loader.vue'
 import Btn from '@/components/ui/Btn.vue'
 import defaultRoute from '@/router/defaultRoute'
 
@@ -12,6 +15,7 @@ const events = inject('events')
 const validate = inject('validate')
 const router = useRouter()
 
+const loading = ref(false)
 const username = ref('')
 const email = ref('')
 const password = ref('')
@@ -49,54 +53,92 @@ function canSubmit() {
     isValidConfirmPassword()
 }
 
-async function register() {
-  if (!canSubmit()) return
-  await api.auth.register(username.value, email.value, password.value)
-  router.push(defaultRoute(api))
-  events.emit('login')
+async function register(e) {
+  if (e) e.preventDefault()
+  checkUsername()
+  checkEmail()
+  checkPassword()
+  checkConfirmPassword()
+  if (!canSubmit() || loading.value) return
+  loading.value = true
+  try {
+    await api.auth.register(username.value, email.value, password.value)
+    router.push(defaultRoute(api))
+    events.emit('login')
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
 <template>
-  <div class="register">
-    <h1 v-text="t('users.Register')" />
-    <text-field
-      v-model="username"
-      autofocus
-      :label="t('users.Username')"
-      icon="account"
-      :error="errorUsername"
-      @change="errorUsername = ''"
-      @blur="checkUsername()"
-    />
-    <text-field
-      v-model="email"
-      type="email"
-      :label="t('users.Email')"
-      icon="email"
-      :error="errorEmail"
-      @change="errorEmail = ''"
-      @blur="checkEmail()"
-    />
-    <text-field
-      v-model="password"
-      type="password"
-      :label="t('users.Password')"
-      icon="lock"
-      :error="errorPassword"
-      @change="errorPassword = ''"
-      @blur="checkPassword()"
-    />
-    <text-field
-      v-model="confirmPassword"
-      type="password"
-      :label="t('users.ConfirmPassword')"
-      icon="lock"
-      :error="errorConfirmPassword"
-      @change="errorConfirmPassword = ''"
-      @blur="checkConfirmPassword()"
-    />
-    <btn color="primary" :disabled="!canSubmit()" @click="register()" v-text="t('users.Register')" />
-    <btn variant="text" @click="$router.push({ name: 'Login' })" v-text="t('users.LoginLink')" />
-  </div>
+  <AuthShell
+    :title="t('users.Register')"
+    subtitle="Create your panel account to deploy and manage servers."
+    mode="register"
+  >
+    <form class="studio-auth-form" @submit.prevent="register">
+      <text-field
+        v-model="username"
+        autofocus
+        :disabled="loading"
+        :label="t('users.Username')"
+        icon="account"
+        :error="errorUsername"
+        @change="errorUsername = ''"
+        @blur="checkUsername()"
+      />
+      <text-field
+        v-model="email"
+        type="email"
+        :disabled="loading"
+        :label="t('users.Email')"
+        icon="email"
+        :error="errorEmail"
+        @change="errorEmail = ''"
+        @blur="checkEmail()"
+      />
+      <div class="auth-password-grid">
+        <text-field
+          v-model="password"
+          type="password"
+          :disabled="loading"
+          :label="t('users.Password')"
+          icon="lock"
+          :error="errorPassword"
+          @change="errorPassword = ''"
+          @blur="checkPassword()"
+        />
+        <text-field
+          v-model="confirmPassword"
+          type="password"
+          :disabled="loading"
+          :label="t('users.ConfirmPassword')"
+          icon="lock"
+          :error="errorConfirmPassword"
+          @change="errorConfirmPassword = ''"
+          @blur="checkConfirmPassword()"
+        />
+      </div>
+      <p class="auth-form-hint">
+        Use at least 8 characters for your password. You can enable TOTP 2FA or Passkeys right after signing up.
+      </p>
+
+      <div class="auth-primary-actions">
+        <btn type="submit" color="primary" :disabled="loading" @click="register">
+          <loader v-if="loading" small />
+          <template v-else>
+            <span v-text="t('users.Register')" />
+            <icon name="arrow-right" />
+          </template>
+        </btn>
+      </div>
+
+      <div class="auth-switch-footer">
+        <button type="button" class="auth-link-btn" @click="$router.push({ name: 'Login' })">
+          {{ t('users.LoginLink') }}
+        </button>
+      </div>
+    </form>
+  </AuthShell>
 </template>

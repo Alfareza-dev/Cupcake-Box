@@ -1,128 +1,141 @@
 @use '../mixins' as *;
 
 .input-field-wrapper {
+  display: block;
+  margin: 0.9rem 0;
+
+  > label.studio-field-top-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text);
+    margin: 0 0 0.42rem;
+    cursor: pointer;
+    transition: color 0.12s ease;
+
+    &.error {
+      color: var(--error);
+    }
+  }
+
+  &:focus-within > label.studio-field-top-label:not(.error) {
+    color: var(--accent-light, var(--primary));
+  }
+
   .input-field {
     position: relative;
-    margin: 12px 0;
+    margin: 0;
+    min-height: 42px;
     display: inline-flex;
     flex-direction: row;
-    border: 1px solid;
-    border-radius: var(--border-radius);
+    align-items: center;
+    border: 1px solid var(--border-strong);
+    background-color: var(--surface-sunken);
+    border-radius: 8px;
     outline: 2px solid transparent;
     width: 100%;
-    transition: all 0.1s ease-in-out;
+    transition: border-color 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+
     &.disabled {
-      border-color: var(--text-disabled);
+      border-color: var(--border);
       background-color: var(--backdrop);
+      opacity: 0.7;
     }
-    label {
-      position: absolute;
-      top: 0;
-      left: calc(0.75 * var(--text-field-base-size, 1rem));
-      font-size: var(--text-field-base-size, 1rem);
-      margin: var(--text-field-base-size, 1rem) 0;
-      pointer-events: none;
-      transition: all 0.1s ease-in-out;
-    }
+
     input {
       background-color: transparent;
+      color: var(--text);
       flex-grow: 1;
       box-sizing: border-box;
-      padding: var(--text-field-base-size, 1rem) var(--text-field-base-size, 1rem);
-      font-size: var(--text-field-base-size, 1rem);
+      padding: 0.62rem 0.85rem;
+      font-size: var(--text-field-base-size, 0.9rem);
       border: none;
       outline: none;
-      width: 1px; // acts more like a min-width, but min-width doesn't work here
-      transition: all 0.1s ease-in-out;
+      width: 1px;
+      transition: all 0.12s ease;
+
       &:disabled {
         color: var(--text-disabled);
       }
+
+      &::placeholder {
+        color: var(--text-disabled);
+      }
+
+      &:focus {
+        caret-color: var(--primary);
+      }
     }
+
     .icon.pre ~ input {
-      padding: var(--text-field-base-size, 1rem) 0;
-    }
-    input::placeholder {
-      color: transparent;
-    }
-    input:focus ~ label, input:not(:placeholder-shown) ~ label {
-      top: calc(-1.5 * var(--text-field-base-size, 1rem));
-      left: calc(0.75 * var(--text-field-base-size, 1rem));
-      font-size: 0.85em;
-      span {
-        position: relative;
-        padding: 0 .35em;
-      }
-      &::before {
-        background-color: var(--background);
-        content: '';
-        position: absolute;
-        height: 60%;
-        width: 100%;
-      }
-    }
-    input:focus {
-      caret-color: var(--primary);
-    }
-    input:focus ~ label {
-      color: var(--primary);
+      padding: 0.62rem 0.75rem 0.62rem 0;
     }
 
     .icon.post.btn {
       @include clickable;
+      display: inline-flex;
+      align-items: center;
     }
+
     .icon.pre {
-      padding: calc(0.5 * var(--text-field-base-size, 1rem)) calc(0.75 * var(--text-field-base-size, 1rem));
-      font-size: calc(2 * var(--text-field-base-size, 1rem));
-      transition: all 0.1s ease-in-out;
+      padding: 0 0.65rem 0 0.8rem;
+      font-size: calc(1.45 * var(--text-field-base-size, 0.9rem));
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.12s ease;
+      &::before {
+        color: var(--text-muted);
+      }
     }
-    .icon.pre ~ label {
-      top: calc(0.25 * var(--text-field-base-size, 1rem));
-      left: calc(3.25 * var(--text-field-base-size, 1rem));
+
+    .icon.post {
+      display: inline-flex;
+      align-items: center;
+      &::before {
+        padding: 0 0.75rem 0 0.35rem;
+        font-size: calc(1.45 * var(--text-field-base-size, 0.9rem));
+        color: var(--text-muted);
+      }
     }
-    .icon.pre ~ input:focus ~ label, .icon.pre ~ input:not(:placeholder-shown) ~ label {
-      top: calc(-1.5 * var(--text-field-base-size, 1rem));
-      left: 0.75em;
-    }
-    .icon.post::before {
-      padding: calc(0.5 * var(--text-field-base-size, 1rem)) calc(0.75 * var(--text-field-base-size, 1rem));
-      padding-left: 0;
-      font-size: calc(2 * var(--text-field-base-size, 1rem));
-    }
+
     .icon.post ~ .post-tooltip {
       position: absolute;
       right: 0;
-      height: 3em;
-      width: 3em;
+      height: 2.6em;
+      width: 2.6em;
     }
+
     &:focus-within {
-      border: 1px solid var(--primary);
-      outline: 2px solid var(--primary);
-      .icon.pre ~ label {
-        left: calc(0.5 * var(--text-field-base-size, 1rem));
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--accent-subtle, rgba(88, 146, 132, 0.18));
+      outline: none;
+      .icon.pre::before {
+        color: var(--accent-light, var(--primary));
       }
     }
   }
+
   .error {
     color: var(--error);
     border-color: var(--error);
-    label, .icon {
+    .icon::before {
       color: var(--error);
     }
   }
+
   span.error {
     display: block;
-    margin-top: -6px;
-    margin-left: 1em;
-    margin-right: 1em;
-    margin-bottom: 12px;
+    font-size: 0.79rem;
+    line-height: 1.4;
+    margin: 0.38rem 0.15rem 0;
   }
 
   .hint {
     display: block;
-    margin-top: -6px;
-    margin-left: 1em;
-    margin-right: 1em;
-    margin-bottom: 12px;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    margin: 0.38rem 0.15rem 0;
     p {
       margin: 0;
       color: var(--text-disabled);
@@ -131,28 +144,7 @@
 }
 
 html[dir="rtl"] .input-field-wrapper {
-  .input-field {
-    label {
-      right: calc(0.75 * var(--text-field-base-size, 1rem));
-      left: unset;
-    }
-    input:focus ~ label, input:not(:placeholder-shown) ~ label {
-      right: calc(0.375 * var(--text-field-base-size, 1rem));
-      left: unset;
-    }
-    .icon.pre ~ label {
-      right: calc(3 * var(--text-field-base-size, 1rem));
-      left: unset;
-    }
-    .icon.pre ~ input:not(:placeholder-shown) ~ label {
-      right: calc(0.5 * var(--text-field-base-size, 1rem));
-      left: unset;
-    }
-    &:focus-within {
-      .icon.pre ~ label {
-        right: calc(0.5 * var(--text-field-base-size, 1rem));
-        left: unset;
-      }
-    }
+  > label.studio-field-top-label {
+    text-align: right;
   }
 }

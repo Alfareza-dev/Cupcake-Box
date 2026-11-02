@@ -5,7 +5,6 @@ import Btn from '@/components/ui/Btn.vue'
 import Icon from '@/components/ui/Icon.vue'
 import Overlay from '@/components/ui/Overlay.vue'
 import TextField from '@/components/ui/TextField.vue'
-import Status from './Status.vue'
 import Controls from './Controls.vue'
 
 const props = defineProps({
@@ -15,22 +14,38 @@ const props = defineProps({
 const { t } = useI18n()
 const edit = ref(false)
 const name = ref(props.server.name)
+const displayName = ref(props.server.name)
 
 async function updateName() {
   await props.server.updateName(name.value)
+  displayName.value = name.value
   edit.value = false
 }
 </script>
 
 <template>
-  <h1 class="server-header">
-    <Status :server="server" />
-    <span class="name">
-      {{ server.name }}
-    </span>
-    <btn v-if="server.hasScope('server.name.edit')" class="rename" variant="icon" :tooltip="t('servers.EditName')" @click="edit = !edit"><icon name="edit" /></btn>
+  <div class="server-header">
+    <div class="server-title-group">
+      <div class="server-title-row">
+        <h1 class="name">{{ displayName }}</h1>
+        <btn
+          v-if="server.hasScope('server.name.edit')"
+          class="rename"
+          variant="icon"
+          :tooltip="t('servers.EditName')"
+          @click="edit = !edit"
+        >
+          <icon name="edit" />
+        </btn>
+      </div>
+      <div class="server-subtitle">
+        <span>{{ server.type }}</span>
+        <span class="sep">·</span>
+        <span>{{ server.node?.name || 'Local Node' }}</span>
+      </div>
+    </div>
     <controls :server="server" />
-  </h1>
+  </div>
   <overlay v-model="edit" :title="t('servers.EditName')" closable class="server-name">
     <text-field v-model="name" />
     <btn color="primary" @click="updateName()"><icon name="save" />{{ t('common.Save') }}</btn>

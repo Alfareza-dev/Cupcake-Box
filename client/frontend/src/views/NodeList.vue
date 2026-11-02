@@ -21,29 +21,44 @@ function setFirstEntry(ref) {
 }
 
 function focusList() {
-  firstEntry.value.$el.focus()
+  if (firstEntry.value && firstEntry.value.$el) firstEntry.value.$el.focus()
 }
 </script>
 
 <template>
-  <div class="nodelist">
-    <h1 v-text="t('nodes.Nodes')" />
+  <div class="nodelist studio-resource-list">
+    <div class="studio-list-header">
+      <div class="header-title-group">
+        <h1 v-text="t('nodes.Nodes')" />
+        <span v-if="nodesLoaded" class="count-pill">{{ nodes.length }}</span>
+      </div>
+      <router-link
+        v-if="$api.auth.hasScope('nodes.create')"
+        v-hotkey="'c'"
+        :to="{ name: 'NodeCreate' }"
+        class="studio-add-btn"
+      >
+        <icon name="plus" />
+        <span>{{ t('nodes.Add') }}</span>
+      </router-link>
+    </div>
     <div v-hotkey="'l'" class="list" @hotkey="focusList()">
       <div v-for="node in nodes" :key="node.name" class="list-item">
         <router-link :ref="setFirstEntry" :to="{ name: 'NodeView', params: { id: node.id } }">
-          <div class="node">
-            <span class="title">{{node.name}}</span>
-            <span class="subline">{{node.publicHost + ':' + node.publicPort}}</span>
+          <div class="node studio-resource-card">
+            <div class="resource-badge">
+              <icon name="node" />
+            </div>
+            <div class="resource-info">
+              <span class="title">{{ node.name }}</span>
+              <span class="subline mono">{{ node.publicHost + ':' + node.publicPort }}</span>
+            </div>
+            <icon name="chevron-right" class="resource-chevron" />
           </div>
         </router-link>
       </div>
       <div v-if="!nodesLoaded" class="list-item">
         <loader small />
-      </div>
-      <div v-if="$api.auth.hasScope('nodes.create')" class="list-item">
-        <router-link v-hotkey="'c'" :to="{ name: 'NodeCreate' }">
-          <div class="createLink"><icon name="plus" />{{ t('nodes.Add') }}</div>
-        </router-link>
       </div>
     </div>
   </div>

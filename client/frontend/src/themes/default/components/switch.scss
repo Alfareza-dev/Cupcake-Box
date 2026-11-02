@@ -3,106 +3,126 @@
 .switch-wrapper {
   @include clickable;
   position: relative;
-  display: block;
-  margin-bottom: 0.5em;
+  display: flex;
+  align-items: center;
+  gap: 0.95rem;
+  margin: 0.65rem 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  background-color: var(--surface-sunken);
+  border: 1px solid var(--border);
+  transition: border-color 0.14s ease, background-color 0.14s ease;
 
-  .switch {
-    position: absolute;
+  &:hover {
+    border-color: var(--border-strong);
+    background-color: rgba(255, 255, 255, 0.025);
+  }
+
+  &.switch-compact {
+    display: inline-flex;
+    padding: 0;
+    margin: 0;
+    gap: 0;
+    background: transparent;
+    border: none;
   }
 
   input {
+    position: absolute;
     opacity: 0;
     width: 0;
     height: 0;
+    pointer-events: none;
+  }
+
+  .switch {
+    position: relative;
+    flex-shrink: 0;
+    width: 2.6rem;
+    height: 1.45rem;
+    display: inline-flex;
+    align-items: center;
   }
 
   .switch:before {
     content: '';
-    margin-top: 12px;
-    margin-bottom: 12px;
+    margin: 0;
     position: relative;
     display: inline-block;
-    width: 3em;
-    height: 1.6em;
-    background-color: #bbb;
-    transition: 0.1s;
-    border-radius: 0.8em;
+    width: 2.6rem;
+    height: 1.45rem;
+    background-color: var(--surface-elevated);
+    border: 1px solid var(--border-strong);
+    transition: 0.15s ease;
+    border-radius: 999px;
+    box-sizing: border-box;
   }
 
   .switch:after {
-    @include raised;
     position: absolute;
     content: '';
-    height: 1.4em;
-    width: 1.4em;
-    background-color: var(--text-primary);
-    transition: 0.1s;
+    height: 1.05rem;
+    width: 1.05rem;
+    background-color: #d8d8de;
+    transition: 0.15s ease;
     border-radius: 50%;
-    top: calc(12px + 0.1em);
-    left: 0.2em;
+    top: 50%;
+    left: 0.2rem;
+    transform: translateY(-50%);
   }
 
   .switch.disabled {
-    cursor: unset;
+    cursor: not-allowed;
     opacity: 0.5;
   }
 
   input:checked + .switch:before {
     background-color: var(--primary);
+    border-color: var(--primary);
   }
 
-  input:focus + .switch:before {
-    outline: 1px solid var(--primary);
+  input:focus-visible + .switch:before {
+    box-shadow: 0 0 0 2px var(--accent-subtle, rgba(88, 146, 132, 0.28));
   }
 
   input:checked + .switch:after {
-    transform: translateX(1.3em);
+    background-color: #fff;
+    transform: translate(1.12rem, -50%);
+  }
+
+  .switch-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+    flex: 1;
   }
 
   .label {
-    line-height: 1.6em;
-    margin-left: 4em;
-    margin-right: .5em;
-    top: -0.5em;
-    position: relative;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.38;
+    margin: 0;
+    position: static;
+    color: var(--text);
   }
 
   .hint {
     display: block;
-    margin-left: 4em;
-    margin-right: .5em;
-    margin-bottom: 12px;
+    font-size: 0.8rem;
+    line-height: 1.48;
+    margin: 0;
+    color: var(--text-muted);
     p {
       margin: 0;
-      color: var(--text-disabled);
+      color: var(--text-muted);
     }
   }
 }
 
-@include high-contrast-mode {
-  .switch:before {
-    background-color: var(--background);
-    border: 3px solid var(--text);
-    width: calc(3em - 6px);
-    height: calc(1.6em - 6px);
-  }
-
-  .switch:after {
-    box-shadow: none;
-  }
-
-  input:checked + .switch:before {
-    background-color: var(--background);
-  }
-
-  .switch:after {
-    background-color: var(--text);
-  }
-}
-
 html[dir="rtl"] {
-  .switch-wrapper .label, .switch-wrapper .hint {
-    margin-left: .5em;
-    margin-right: 4em;
+  .switch-wrapper {
+    flex-direction: row-reverse;
+    text-align: right;
   }
 }

@@ -132,13 +132,14 @@ function confirm() {
   <div class="environment">
     <text-field v-model="name" :label="t('servers.Name')" :error="nameError" autofocus @blur="nameBlur()" @change="nameError = undefined" />
     <div class="dropdown-wrapper">
+      <label class="studio-field-top-label" for="userselect" @click="msUsers.open()">{{ t('users.Users') }}</label>
       <div :class="['dropdown', !validateUsers() ? 'error' : '']">
         <multiselect
           id="userselect"
           ref="msUsers"
           v-model="users"
           mode="tags"
-          placeholder="t('server.SearchUsers')"
+          :placeholder="t('users.Users')"
           :close-on-select="false"
           :can-clear="false"
           :filter-results="false"
@@ -149,7 +150,6 @@ function confirm() {
           :options="searchUsers"
           :disabled="nouser"
         />
-        <label for="userselect" @click="msUsers.open()">{{ t('users.Users') }}</label>
       </div>
       <span v-if="!validateUsers()" class="error" v-text="t('servers.AtLeastOneUserRequired')" />
     </div>

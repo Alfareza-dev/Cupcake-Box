@@ -5,7 +5,15 @@
 *.iml
 *.pem
 .DS_Store
+Thumbs.db
 __*
+.env
+.env.*
+*.log
+*.db
+*.sqlite
+*.sqlite3
+coverage.out
 
 logs/
 config.json
@@ -13,6 +21,8 @@ vendor/
 client/dist/
 !client/dist/webfiles.go
 client/node_modules/
+client/*/dist/
+client/*/node_modules/
 web/swagger/
 .vs/
 www/
@@ -21,7 +31,7 @@ operations/spongedl/cache/
 operations/spongedl/mods/
 operations/spongedl/*.jar
 
-favicon.ico
+/favicon.ico
 .dotnet/
 .wix/
 /pufferpanel.msi

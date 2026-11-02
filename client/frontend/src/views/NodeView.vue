@@ -1,6 +1,6 @@
 <script setup>
 import { ref, inject, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import markdown from '@/utils/markdown'
 import Btn from '@/components/ui/Btn.vue'
@@ -29,6 +29,7 @@ const sftpPort = ref('5657')
 const currentStep = ref(1)
 const featuresFetched = ref(null)
 const features = ref({})
+const nodeServerCount = ref(0)
 
 onMounted(async () => {
   const node = await api.node.get(route.params.id)
@@ -45,6 +46,12 @@ onMounted(async () => {
   }
 
   fetchFeatures()
+  try {
+    const sList = await api.server.list(1, 100)
+    nodeServerCount.value = (sList.servers || []).filter(s => String(s.node?.id) === String(route.params.id)).length
+  } catch {
+    nodeServerCount.value = 0
+  }
 })
 
 async function fetchFeatures() {
@@ -52,12 +59,12 @@ async function fetchFeatures() {
   features.value = {}
   try {
     const f = await api.node.features(route.params.id)
-    features.value.envs = [ ...new Set(f.environments.map(e => e === 'standard' || e === 'tty' ? 'host' : e)) ].map(e => t(`env.${e}.name`))
+    features.value.envs = [...new Set(f.environments.map(e => e === 'standard' || e === 'tty' ? 'host' : e))].map(e => t(`env.${e}.name`))
     features.value.docker = f.features.indexOf('docker') !== -1
     features.value.os = f.os
     features.value.arch = f.arch
     featuresFetched.value = true
-  } catch(e) {
+  } catch {
     featuresFetched.value = false
   }
 }
@@ -149,46 +156,125 @@ function closeDeploy() {
 </script>
 
 <template>
-  <div class="nodeview">
-    <h1 v-text="name" />
-    <loader v-if="featuresFetched === null" />
-    <div v-else-if="featuresFetched === false" class="features">
-      <div class="unreachable" v-text="t('nodes.Unreachable')" />
-    </div>
-    <div v-else class="features">
-      <div class="reachable" v-text="t('nodes.Reachable')" />
-      <div class="os">
-        <span v-text="t('nodes.features.os.label')" />
-        <span v-text="t('nodes.features.os.' + features.os)" />
+  <div class="nodeview studio-nodeview">
+    <div class="studio-page-topbar">
+      <div class="title-wrap">
+        <h1 v-text="name || t('nodes.Nodes')" />
+        <span class="subtitle">A quick overview and configuration of your node.</span>
       </div>
-      <div class="arch">
-        <span v-text="t('nodes.features.arch.label')" />
-        <span v-text="t('nodes.features.arch.' + features.arch)" />
-      </div>
-      <div class="env">
-        <span v-text="t('nodes.features.envs')" />
-        <span v-text="features.envs.join(', ')" />
-      </div>
-      <div class="docker">
-        <span v-text="t('env.docker.name')" />
-        <span v-text="t('nodes.features.docker.' + features.docker)" />
+      <div class="breadcrumb">
+        <span>Admin</span>
+        <span class="sep">&rsaquo;</span>
+        <router-link :to="{ name: 'NodeList' }">{{ t('nodes.Nodes') }}</router-link>
+        <span class="sep">&rsaquo;</span>
+        <span class="current">{{ name }}</span>
       </div>
     </div>
-    <h2 v-text="t('nodes.Edit')" />
-    <div v-if="route.params.id > 0" class="edit">
-      <text-field v-model="name" class="name" :label="t('common.Name')" />
-      <text-field v-model="publicHost" class="public-host" :label="t('nodes.PublicHost')" />
-      <text-field v-model="publicPort" class="public-port" :label="t('nodes.PublicPort')" type="number" />
-      <toggle v-model="withPrivateHost" class="private-toggle" :label="t('nodes.WithPrivateAddress')" :hint="t('nodes.WithPrivateAddressHint')" />
-      <text-field v-if="withPrivateHost" v-model="privateHost" class="private-host" :label="t('nodes.PrivateHost')" />
-      <text-field v-if="withPrivateHost" v-model="privatePort" class="private-port" :label="t('nodes.PrivatePort')" type="number" />
-      <text-field v-model="sftpPort" class="sftp-port" :label="t('nodes.SftpPort')" type="number" />
-      <btn :disabled="!canSubmit()" color="primary" @click="submit()"><icon name="save" />{{ t('nodes.Update') }}</btn>
-      <btn color="error" @click="deleteNode()"><icon name="remove" />{{ t('nodes.Delete') }}</btn>
-      <btn @click="deploymentOpen = true" v-text="t('nodes.Deploy')" />
+
+    <div class="studio-node-grid">
+      <div class="studio-node-left">
+        <!-- Information Card -->
+        <div class="studio-section-card accent-top">
+          <div class="studio-card-header">Information</div>
+          <div class="studio-card-body no-pad">
+            <div v-if="featuresFetched === null" class="pad-box">
+              <loader small />
+            </div>
+            <div v-else-if="featuresFetched === false" class="pad-box">
+              <div class="unreachable-pill" v-text="t('nodes.Unreachable')" />
+            </div>
+            <div v-else class="studio-kv-table">
+              <div class="kv-row">
+                <span class="kv-key">Daemon Status</span>
+                <span class="kv-val status-ok">{{ t('nodes.Reachable') }}</span>
+              </div>
+              <div class="kv-row">
+                <span class="kv-key">{{ t('nodes.features.os.label') }}</span>
+                <span class="kv-val"><code>{{ t('nodes.features.os.' + features.os) }} ({{ t('nodes.features.arch.' + features.arch) }})</code></span>
+              </div>
+              <div class="kv-row">
+                <span class="kv-key">{{ t('nodes.features.envs') }}</span>
+                <span class="kv-val">{{ features.envs.join(', ') }}</span>
+              </div>
+              <div class="kv-row">
+                <span class="kv-key">{{ t('env.docker.name') }}</span>
+                <span class="kv-val">{{ t('nodes.features.docker.' + features.docker) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit / Configuration Card -->
+        <div class="studio-section-card accent-top">
+          <div class="studio-card-header" v-text="t('nodes.Edit')" />
+          <div class="studio-card-body">
+            <div v-if="Number(route.params.id) > 0" class="edit">
+              <text-field v-model="name" class="name" :label="t('common.Name')" />
+              <text-field v-model="publicHost" class="public-host" :label="t('nodes.PublicHost')" />
+              <text-field v-model="publicPort" class="public-port" :label="t('nodes.PublicPort')" type="number" />
+              <toggle v-model="withPrivateHost" class="private-toggle" :label="t('nodes.WithPrivateAddress')" :hint="t('nodes.WithPrivateAddressHint')" />
+              <text-field v-if="withPrivateHost" v-model="privateHost" class="private-host" :label="t('nodes.PrivateHost')" />
+              <text-field v-if="withPrivateHost" v-model="privatePort" class="private-port" :label="t('nodes.PrivatePort')" type="number" />
+              <text-field v-model="sftpPort" class="sftp-port" :label="t('nodes.SftpPort')" type="number" />
+              <div class="node-edit-actions">
+                <btn :disabled="!canSubmit()" color="primary" @click="submit()"><icon name="save" />{{ t('nodes.Update') }}</btn>
+                <btn variant="neutral" @click="deploymentOpen = true" v-text="t('nodes.Deploy')" />
+              </div>
+            </div>
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <div v-else class="local-node-note" v-html="markdown(t('nodes.LocalNodeEdit'))" />
+          </div>
+        </div>
+
+        <!-- Danger Zone Card -->
+        <div v-if="Number(route.params.id) > 0" class="studio-section-card danger-top">
+          <div class="studio-card-header">{{ t('nodes.Delete') }}</div>
+          <div class="studio-card-body">
+            <p class="danger-desc">
+              Deleting a node is an irreversible action and will immediately remove this node from the panel. Ensure no active servers remain linked before continuing.
+            </p>
+            <div class="danger-footer">
+              <btn color="error" class="danger-btn" @click="deleteNode()">
+                <icon name="remove" />{{ t('nodes.Delete') }}
+              </btn>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right At-a-Glance Column -->
+      <div class="studio-node-right">
+        <div class="studio-section-card accent-top">
+          <div class="studio-card-header">At-a-Glance</div>
+          <div class="studio-card-body glance-stack">
+            <div class="glance-tile sage">
+              <div class="glance-icon"><icon name="network" /></div>
+              <div class="glance-info">
+                <span class="glance-label">PUBLIC ENDPOINT</span>
+                <span class="glance-val">{{ publicHost || '127.0.0.1' }}:{{ publicPort }}</span>
+              </div>
+            </div>
+
+            <div class="glance-tile moss">
+              <div class="glance-icon"><icon name="sftp" /></div>
+              <div class="glance-info">
+                <span class="glance-label">SFTP PORT</span>
+                <span class="glance-val">{{ sftpPort }}</span>
+              </div>
+            </div>
+
+            <div class="glance-tile teal">
+              <div class="glance-icon"><icon name="server" /></div>
+              <div class="glance-info">
+                <span class="glance-label">TOTAL SERVERS</span>
+                <span class="glance-val">{{ nodeServerCount }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <!-- eslint-disable-next-line vue/no-v-html -->
-    <div v-else class="edit" v-html="markdown(t('nodes.LocalNodeEdit'))" />
+
     <overlay v-model="deploymentOpen" closable :title="t('nodes.Deploy')" @close="closeDeploy()">
       <!-- eslint-disable-next-line vue/no-v-html -->
       <div v-html="markdown(t(`nodes.deploy.Step${currentStep}`, { config: getDeployConfig() }))" />

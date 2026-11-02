@@ -220,7 +220,7 @@ func webManifest(c *gin.Context) {
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"name":             config.CompanyName.Value(),
 		"short_name":       config.CompanyName.Value(),
-		"background_color": "#fff",
+		"background_color": "#141416",
 		"display":          "standalone",
 		"scope":            "/",
 		"start_url":        "/servers",

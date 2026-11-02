@@ -3,16 +3,26 @@
 #toasts {
   position: fixed;
   top: 64px;
-  right: 1em;
-  z-index: 10;
+  right: 1.25rem;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 
   .toast {
     @include card;
-    margin-top: 1em;
-    transition: all 0.1s ease-in-out;
+    @include raised;
+    margin-top: 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    background-color: var(--surface-elevated);
+    transition: all 0.15s ease;
   }
 
-  .toast.in, .toast.out {
+  .toast.in,
+  .toast.out {
     height: 0;
     padding: 0;
     margin: 0;
@@ -20,17 +30,19 @@
   }
 
   .error {
-    background-color: var(--error);
+    background-color: var(--surface-elevated);
+    border-left: 3px solid var(--error);
     color: var(--text);
   }
 
   .success {
-    background-color: var(--success);
+    background-color: var(--surface-elevated);
+    border-left: 3px solid var(--success);
     color: var(--text);
   }
 }
 
 html[dir="rtl"] #toasts {
   right: unset;
-  left: 1em;
+  left: 1.25rem;
 }

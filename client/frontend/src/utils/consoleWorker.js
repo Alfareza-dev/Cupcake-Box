@@ -18,9 +18,9 @@ function handleCarriageReturn(line) {
   return line
 }
 
-function markDaemon(line, panelName) {
+function markDaemon(line, panelName = 'Cupcake Box') {
   if (line.trim().indexOf('[DAEMON]') === 0) {
-    return `<span class="daemon-marker" data-name="${panelName}"></span>` + line.substring(8)
+    return `<span class="daemon-marker" data-name="${panelName || 'Cupcake Box'}"></span>` + line.substring(8)
   }
 
   return line

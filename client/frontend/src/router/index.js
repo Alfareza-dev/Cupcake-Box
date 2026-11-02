@@ -1,8 +1,29 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import makeRoutes from './routes'
 import defaultRoute from './defaultRoute'
+import { DEFAULT_BRAND_NAME, normalizeBrandName } from '@/plugins/config'
 
-export default function(api) {
+const ROUTE_TITLES = {
+  Login: 'Login',
+  Register: 'Register',
+  Invite: 'Account Invite',
+  ServerList: 'Servers',
+  ServerCreate: 'Create Server',
+  ServerView: 'Server',
+  NodeList: 'Nodes',
+  NodeCreate: 'Create Node',
+  NodeView: 'Node',
+  UserList: 'Users',
+  UserCreate: 'Create User',
+  UserView: 'User',
+  TemplateList: 'Templates',
+  TemplateCreate: 'Create Template',
+  TemplateView: 'Template',
+  Settings: 'Settings',
+  Self: 'Account & Theme'
+}
+
+export default function(api, config) {
   const router = createRouter({
     history: createWebHistory(),
     linkExactActiveClass: 'active',
@@ -34,6 +55,12 @@ export default function(api) {
     }
 
     return true
+  })
+
+  router.afterEach((to) => {
+    const brand = normalizeBrandName(config?.branding?.name || DEFAULT_BRAND_NAME)
+    const section = ROUTE_TITLES[to.name]
+    document.title = section ? `${section} · ${brand}` : brand
   })
 
   return router

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#222328" />
+      <stop offset="1" stop-color="#141518" />
+    </linearGradient>
+    <linearGradient id="sage" x1="18" y1="14" x2="46" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7eb3a6" />
+      <stop offset="1" stop-color="#589284" />
+    </linearGradient>
+  </defs>
+  <!-- Outer Box Squircle -->
+  <rect x="3" y="3" width="58" height="58" rx="15" fill="url(#bg)" stroke="#589284" stroke-width="2.5" stroke-opacity="0.55" />
+  <!-- Subtle Box Corner Brackets -->
+  <path d="M13 20V14.5C13 13.67 13.67 13 14.5 13H20M44 13H49.5C50.33 13 51 13.67 51 14.5V20M51 44V49.5C51 50.33 50.33 51 49.5 51H44M20 51H14.5C13.67 51 13 50.33 13 49.5V44" stroke="#79a99d" stroke-width="2" stroke-linecap="round" stroke-opacity="0.45" />
+  <!-- Cherry / Topper -->
+  <circle cx="32" cy="16.5" r="3.2" fill="#e8a598" />
+  <!-- Frosting Swirl -->
+  <path d="M20.5 31C18.5 31 17 29.5 17 27.5C17 25.4 18.7 23.8 20.8 23.9C21.4 20.6 24.4 18.5 27.9 18.9C29.1 17.8 30.5 17.4 32 17.4C33.5 17.4 34.9 17.8 36.1 18.9C39.6 18.5 42.6 20.6 43.2 23.9C45.3 23.8 47 25.4 47 27.5C47 29.5 45.5 31 43.5 31H20.5Z" fill="#f3f5f7" />
+  <!-- Cupcake Wrapper Base (Boxed Trapezoid) -->
+  <path d="M20.5 33.5H43.5L40.4 45.8C40.05 47.15 38.84 48.1 37.45 48.1H26.55C25.16 48.1 23.95 47.15 23.6 45.8L20.5 33.5Z" fill="url(#sage)" />
+  <!-- Pleat Ribs -->
+  <path d="M27.5 36.2L28.6 45.2M32 36.2V45.2M36.5 36.2L35.4 45.2" stroke="#16171a" stroke-width="2" stroke-linecap="round" stroke-opacity="0.55" />
+</svg>
+

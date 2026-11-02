@@ -1,8 +1,8 @@
 <script setup>
-import { ref, inject, onMounted, onUnmounted } from 'vue'
+import { ref, computed, inject, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Icon from '@/components/ui/Icon.vue'
-import TextField from '@/components/ui/TextField.vue'
+import Stats from './Stats.vue'
 
 import ConsoleWorker from '@/utils/consoleWorker.js?worker&inline'
 const worker = new ConsoleWorker()
@@ -10,10 +10,10 @@ let lastElem = null
 
 const { t } = useI18n()
 const config = inject('config')
-const panelName = config.branding.name
+const panelName = computed(() => config?.branding?.name || 'Cupcake Box')
 
 const command = ref('')
-const console = ref(null)
+const consoleEl = ref(null)
 let lastMessageTime = 0
 
 const props = defineProps({
@@ -23,33 +23,47 @@ const props = defineProps({
 let unbindEvent = null
 let task = null
 onMounted(async () => {
-  worker.addEventListener("message", onWorkerMessage)
+  worker.addEventListener('message', onWorkerMessage)
   unbindEvent = props.server.on('console', onMessage)
 
-  onMessage(await props.server.getConsole())
+  if (props.server.hasScope('server.console')) {
+    try {
+      onMessage(await props.server.getConsole())
+    } catch {
+      // ignore initial console error
+    }
+  }
+
   task = props.server.startTask(async () => {
     if (props.server.needsPolling() && props.server.hasScope('server.console')) {
-      onMessage(await props.server.getConsole(lastMessageTime))
+      try {
+        onMessage(await props.server.getConsole(lastMessageTime))
+      } catch {
+        // ignore polling error
+      }
     }
   }, 5000)
 })
 
 onUnmounted(() => {
+  worker.removeEventListener('message', onWorkerMessage)
   if (unbindEvent) unbindEvent()
   if (task) props.server.stopTask(task)
   clearConsole()
 })
 
 function onMessage(e) {
+  if (!e) return
   if ('epoch' in e) {
     lastMessageTime = e.epoch
   } else {
     lastMessageTime = Date.now()
   }
-  worker.postMessage({ ...e, panelName })
+  worker.postMessage({ ...e, panelName: panelName.value })
 }
 
 function onWorkerMessage(e) {
+  if (!consoleEl.value) return
   const newElems = []
   e.data.map(update => {
     if (update.op === 'update' && lastElem) {
@@ -61,17 +75,17 @@ function onWorkerMessage(e) {
       lastElem = el
     }
   })
-  if (newElems + console.value.children.length > 1200) {
-    let elems = console.value.children.concat(newElems)
+  if (newElems.length + consoleEl.value.children.length > 1200) {
+    let elems = Array.from(consoleEl.value.children).concat(newElems)
     elems = elems.slice(elems.length - 1000, elems.length)
-    console.value.replaceChildren(elems)
+    consoleEl.value.replaceChildren(...elems)
   } else {
-    console.value.append(...newElems)
+    consoleEl.value.append(...newElems)
   }
 }
 
 function clearConsole() {
-  if (console.value) console.value.replaceChildren([])
+  if (consoleEl.value) consoleEl.value.replaceChildren()
 }
 
 const history = ref([])
@@ -79,6 +93,8 @@ const historyIndex = ref(-1)
 const temporaryCommand = ref('')
 
 function sendCommand() {
+  if (!command.value.trim()) return
+
   if (historyIndex.value !== -1) {
     history.value.splice(historyIndex.value, 1)
   }
@@ -125,26 +141,42 @@ function nextCommand() {
     command.value = history.value[historyIndex.value]
   }
 }
-
 </script>
 
 <template>
-  <div>
-    <h2 v-text="t('servers.Console')" />
-    <icon v-if="server.hasScope('server.console')" v-hotkey="'c x'" name="clear-console" @click="clearConsole()" />
-    <div v-if="server.hasScope('server.console')" dir="ltr" class="console-wrapper">
-      <div ref="console" class="console" />
+  <div class="studio-console-section">
+    <div v-if="server.hasScope('server.console')" class="console-shell">
+      <button
+        v-hotkey="'c x'"
+        type="button"
+        class="console-clear-btn"
+        :title="t('common.Clear') || 'Clear console'"
+        @click="clearConsole()"
+      >
+        <icon name="clear-console" />
+      </button>
+      <div dir="ltr" class="console-wrapper">
+        <div ref="consoleEl" class="console" />
+      </div>
     </div>
-    <div v-if="server.hasScope('server.console.send')" dir="ltr" class="command">
-      <text-field
+
+    <div v-if="server.hasScope('server.console.send')" dir="ltr" class="studio-command-bar">
+      <icon name="prompt" class="prompt-icon" />
+      <input
         v-model="command"
         v-hotkey="'c c'"
-        :label="t('servers.Command')"
+        type="text"
+        class="command-input"
+        placeholder="Type a command..."
         @keyup.enter="sendCommand()"
         @keydown.up.prevent="previousCommand()"
         @keydown.down.prevent="nextCommand()"
       />
-      <icon name="send" @click="sendCommand()" />
+      <button type="button" class="command-send-btn" :disabled="!command.trim()" @click="sendCommand()">
+        <icon name="send" />
+      </button>
     </div>
+
+    <Stats v-if="server.hasScope('server.stats')" :server="server" compact />
   </div>
 </template>

@@ -11,43 +11,46 @@
     }
   }
 
-  @each $t in ('server', 'node', 'user', 'template') {
+  @each $t in ('node', 'user', 'template') {
     .#{$t}list {
-      @include card;
       @include cols(12);
+      h1 {
+        font-size: 1.35rem;
+        font-weight: 600;
+        margin-top: 0;
+        margin-bottom: 1.1rem;
+      }
       .list {
         .list-item a:focus-visible {
           outline: none;
           .#{$t}, .createLink {
-            outline: 3px solid var(--primary);
-            outline-offset: -3px;
+            outline: 2px solid var(--primary);
+            outline-offset: -2px;
           }
         }
         @include gridlist;
+        .list-item {
+          padding: 0;
+          a {
+            width: 100%;
+          }
+        }
         .#{$t} {
           @include card;
-          background: color-mix(in srgb, var(--background) 87.5%, #fff0 12.5%);
+          background: var(--background);
+          border: 1px solid var(--border);
           margin-top: 0;
+          padding: 1.1rem 1.25rem;
         }
         .#{$t}:not(.disabled) {
-          @include link;
           &:hover {
-            background: color-mix(in srgb, var(--primary) 20%, color-mix(in srgb, var(--background) 85%, #fff0 15%) 80%);
+            background: var(--surface-elevated);
+            border-color: var(--accent-border, var(--border-strong));
           }
         }
         .#{$t}.disabled {
           background-color: var(--backdrop);
-        }
-
-        @include breakpoint-only(xs) {
-          grid-gap: .75rem;
-          gap: .75rem;
-          .list-item {
-            padding: 0;
-            a {
-              width: 100%;
-            }
-          }
+          opacity: 0.6;
         }
       }
 
@@ -57,7 +60,7 @@
 
       .#{$t} {
         .title, .subline {
-          overflow: clip visible;
+          overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
           max-width: 100%;
@@ -65,51 +68,15 @@
 
         .title {
           display: inline-block;
+          font-weight: 600;
+          font-size: 0.95rem;
         }
 
         .subline {
           display: block;
-        }
-      }
-    }
-  }
-}
-
-@include high-contrast-mode {
-  &.list-type-grid {
-    @each $t in ('server', 'node', 'user', 'template') {
-      .#{$t}list {
-        .list {
-          .list-item a:focus-visible {
-            outline: none;
-            .#{$t}, .createLink {
-              outline: 3px solid var(--primary);
-              outline-offset: -3px;
-            }
-            .#{$t} .title, .createLink {
-              text-decoration: underline;
-            }
-          }
-          @include breakpoint(md) {
-            .#{$t} {
-              border: 2px solid var(--text);
-              font-weight: bold;
-            }
-            .#{$t}.disabled {
-              border-color: var(--text-disabled);
-            }
-          }
-
-          @include breakpoint-only(xs) {
-            .#{$t} {
-              @include card;
-              border: 2px solid var(--text);
-              font-weight: bold;
-            }
-            .#{$t}.disabled {
-              border-color: var(--text-disabled);
-            }
-          }
+          font-size: 0.82rem;
+          color: var(--text-muted);
+          margin-top: 0.2rem;
         }
       }
     }
@@ -121,11 +88,15 @@
     @include baselist;
   }
 
-  @each $t in ('server', 'node', 'user', 'template') {
+  // In list mode, server cards stretch 1 per row while preserving the Studio card fields
+  .studio-serverlist .studio-server-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  @each $t in ('node', 'user', 'template') {
     .#{$t}list {
       @include card;
       @include cols(12);
-      max-width: calc(100% - 2em);
       .list {
         @include baselist;
         .list-item {
@@ -136,7 +107,8 @@
         }
         .#{$t} {
           @include link;
-          padding: 1em;
+          padding: 0.85rem 1rem;
+          border-bottom: 1px solid var(--border);
         }
         .createLink {
           margin-top: 1em;
@@ -149,7 +121,7 @@
 
       .#{$t} {
         .title, .subline {
-          overflow: clip visible;
+          overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
           max-width: 100%;
@@ -157,10 +129,12 @@
 
         .title {
           display: inline-block;
+          font-weight: 600;
         }
 
         .subline {
           display: block;
+          color: var(--text-muted);
         }
       }
     }

@@ -7,10 +7,11 @@ export default {
     Icon
   },
   props: {
-    anchors: { type: Boolean, default: () => false }
+    anchors: { type: Boolean, default: () => false },
+    serverSidebar: { type: Boolean, default: () => false }
   },
-  emits: ['tabChanged'],
-  setup(props, { slots, emit }) {
+  emits: ['tabChanged', 'tabsReady'],
+  setup(props, { slots, emit, expose }) {
     const tabButtons = ref(null)
     const needsLeftScroller = ref(false)
     const needsRightScroller = ref(false)
@@ -31,14 +32,19 @@ export default {
     }
 
     function onResizeOrScroll() {
+      if (!tabButtons.value) return
       if (tabButtons.value.scrollWidth > tabButtons.value.offsetWidth) {
         needsLeftScroller.value = tabButtons.value.scrollLeft > 5
         const leftMax = tabButtons.value.scrollWidth - tabButtons.value.offsetWidth
         needsRightScroller.value = (leftMax - tabButtons.value.scrollLeft) > 5
+      } else {
+        needsLeftScroller.value = false
+        needsRightScroller.value = false
       }
     }
 
     function scroll(dir) {
+      if (!tabButtons.value) return
       const dist = (tabButtons.value.offsetWidth / 2)
       tabButtons.value.scrollTo({
         behavior: 'smooth',
@@ -49,16 +55,17 @@ export default {
     onMounted(() => {
       window.addEventListener('resize', onResizeOrScroll)
       nextTick(() => {
-        tabButtons.value.addEventListener('scroll', onResizeOrScroll)
-        onResizeOrScroll()
+        if (tabButtons.value) {
+          tabButtons.value.addEventListener('scroll', onResizeOrScroll)
+          onResizeOrScroll()
+        }
       })
 
-      tabs.value = slots
-        .default()
+      tabs.value = (slots.default ? slots.default() : [])
         .filter(e => e && e.props && e.props.title)
         .map(e => {
           return {
-            key: e.props.id || e.props.title.toLowercase().replace(/ /g, '-'),
+            key: e.props.id || e.props.title.toLowerCase().replace(/ /g, '-'),
             title: e.props.title,
             icon: e.props.icon,
             hotkey: e.props.hotkey
@@ -73,12 +80,22 @@ export default {
       if (tabs.value.length > 0 && !activeKey.value) {
         setActive(tabs.value[0].key)
       }
+
+      emit('tabsReady', {
+        tabs: tabs.value,
+        activeKey: activeKey.value,
+        setActive
+      })
     })
 
     onUnmounted(() => {
       window.removeEventListener('resize', onResizeOrScroll)
-      tabButtons.value.removeEventListener('scroll', onResizeOrScroll)
+      if (tabButtons.value) {
+        tabButtons.value.removeEventListener('scroll', onResizeOrScroll)
+      }
     })
+
+    expose({ tabs, activeKey, setActive })
 
     return { tabButtons, needsLeftScroller, needsRightScroller, tabs, activeKey, setActive, scroll }
   }
@@ -86,7 +103,7 @@ export default {
 </script>
 
 <template>
-  <div class="tabs">
+  <div :class="['tabs', serverSidebar ? 'server-sidebar-tabs' : '']">
     <div v-if="needsLeftScroller" class="scroll-left" @click="scroll('left')" />
     <div v-if="needsRightScroller" class="scroll-right" @click="scroll('right')" />
     <div ref="tabButtons" class="tab-buttons">

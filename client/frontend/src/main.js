@@ -37,7 +37,7 @@ if (/app\.github\.dev/.test(window.location.host) && checkEnv) {
   or the disabling of repositories created to run Codespaces in a way that violates these Terms.
 </blockquote>
 <h4 style="text-wrap:balance;max-width:75%;align-self:center;margin:1em">
-  The PufferPanel team does not tolerate or support the use of PufferPanel in order to facilitate violations against the GitHub Terms of Service
+  The Cupcake Box team does not tolerate or support the use of Cupcake Box in order to facilitate violations against the GitHub Terms of Service
 </h4>
 `
   document.getElementById('app').appendChild(err)
@@ -63,7 +63,7 @@ async function mountApp(config) {
     .use(theme(config))
     .use(toast)
     .use(validators)
-    .use(makeRouter(apiClient))
+    .use(makeRouter(apiClient, config))
     .use(hotkeys)
     .use({
       install: (app) => {
@@ -84,7 +84,7 @@ apiClient
     console.log(error)
     mountApp({
       branding: {
-        name: 'PufferPanel'
+        name: 'Cupcake Box'
       },
       themes: {
         active: 'PufferPanel',

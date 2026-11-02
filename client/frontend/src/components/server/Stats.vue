@@ -9,10 +9,11 @@ const fromCss = (el, prop) => {
   return getComputedStyle(el).getPropertyValue(prop).trim()
 }
 
-const defaultFamily = "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+const defaultFamily = "'Inter', 'Quicksand', 'Helvetica Neue', sans-serif"
 
 const props = defineProps({
-  server: { type: Object, required: true }
+  server: { type: Object, required: true },
+  compact: { type: Boolean, default: () => false }
 })
 
 const { t, locale } = useI18n()
@@ -23,7 +24,7 @@ const numFormat = new Intl.NumberFormat(
 )
 
 const formatCpu = (value) => {
-  return numFormat.format(value) + ' %'
+  return numFormat.format(value || 0) + ' %'
 }
 
 const formatMemory = (value) => {
@@ -35,11 +36,6 @@ const formatMemory = (value) => {
   return numFormat.format(value / Math.pow(2, 40)) + ' TiB'
 }
 
-// date-fns localization approach takes importing an object per locale
-// which is both a lot of data and annoying to have to handle as that
-// means manually dealing with fallbacks, dynamic imports, etc
-// so instead we just force the adapter to use the browsers built in
-// date localization tooling and just let date-fns do the logic parts
 const intl = new Intl.DateTimeFormat(
   [locale.value.replace('_', '-'), 'en'],
   { hour: 'numeric', minute: 'numeric', second: 'numeric' }
@@ -54,6 +50,9 @@ Tooltip.positioners.cursor = (_, eventPosition) => {
 
 const cpuChartEl = ref(null)
 const memoryChartEl = ref(null)
+const latestCpu = ref('0 %')
+const latestMemory = ref('0 B')
+
 let cpuChart = null
 let memoryChart = null
 const cpu = []
@@ -64,10 +63,14 @@ const jvmMetaUsed = []
 const jvmMetaAlloc = []
 
 function addData(d) {
+  if (!d || !cpuChart || !memoryChart) return
   const x = new Date().getTime()
 
-  cpu.push({ x, y: d.cpu })
-  memory.push({ x, y: d.memory })
+  latestCpu.value = formatCpu(d.cpu || 0)
+  latestMemory.value = formatMemory(d.memory || 0)
+
+  cpu.push({ x, y: d.cpu || 0 })
+  memory.push({ x, y: d.memory || 0 })
 
   if (d.jvm) {
     jvmHeapUsed.push({ x, y: d.jvm.heapUsed })
@@ -82,13 +85,13 @@ function addData(d) {
     memoryChart.hide(memoryChart.data.datasets.findIndex(set => set.label === t('servers.Memory')))
   }
 
-  for (let graph of [cpu, memory, jvmHeapUsed, jvmHeapAlloc, jvmMetaUsed, jvmMetaAlloc]) {
+  for (const graph of [cpu, memory, jvmHeapUsed, jvmHeapAlloc, jvmMetaUsed, jvmMetaAlloc]) {
     while (graph.length > 60) {
       graph.shift()
     }
   }
 
-  for (let chart of [cpuChart, memoryChart]) {
+  for (const chart of [cpuChart, memoryChart]) {
     chart.options.scales.x.min = x - (60 * 1000)
     chart.update()
   }
@@ -97,10 +100,12 @@ function addData(d) {
 const chartOptions = (mode) => {
   const options = {
     responsive: true,
+    maintainAspectRatio: true,
     aspectRatio: (ctx) => {
       if (ctx.chart.canvas) {
-        return parseFloat(fromCss(ctx.chart.canvas.parentElement, 'aspect-ratio')) || 2
-      } else return 2
+        return parseFloat(fromCss(ctx.chart.canvas.parentElement, 'aspect-ratio')) || (props.compact ? 3.2 : 2.8)
+      }
+      return props.compact ? 3.2 : 2.8
     },
     parsing: false,
     locale: locale.value.split('_')[0] || 'en',
@@ -127,40 +132,32 @@ const chartOptions = (mode) => {
         itemSort: (a, b) => {
           return a.datasetIndex < b.datasetIndex
         },
-        multiKeyBackground: (ctx) => fromCss(ctx.chart.canvas, 'background-color') || '#fff',
-        padding: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-padding') || 6,
-        backgroundColor: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-background-color') || 'rgba(0, 0, 0, 0.8)',
-        cornerRadius: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-corner-radius') || 6,
-        borderColor: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-border-color') || 'rgba(0, 0, 0, 0)',
-        borderWidth: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-border-width') || 0,
+        multiKeyBackground: (ctx) => fromCss(ctx.chart.canvas, 'background-color') || '#1b1b1e',
+        padding: (ctx) => parseInt(fromCss(ctx.chart.canvas, '--chartjs-tooltip-padding')) || 8,
+        backgroundColor: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-background-color') || 'rgba(20, 20, 23, 0.92)',
+        cornerRadius: (ctx) => parseInt(fromCss(ctx.chart.canvas, '--chartjs-tooltip-corner-radius')) || 8,
+        borderColor: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-border-color') || 'rgba(255, 255, 255, 0.08)',
+        borderWidth: (ctx) => parseInt(fromCss(ctx.chart.canvas, '--chartjs-tooltip-border-width')) || 1,
         titleAlign: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-title-align') || 'left',
-        titleColor: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-font-color') || '#fff',
-        bodyColor: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-font-color') || '#fff',
-        bodySpacing: (ctx) => parseInt(fromCss(ctx.chart.canvas, '--chartjs-tooltip-body-spacing')) || 2,
+        titleColor: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-font-color') || '#e6e6e8',
+        bodyColor: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-font-color') || '#e6e6e8',
+        bodySpacing: (ctx) => parseInt(fromCss(ctx.chart.canvas, '--chartjs-tooltip-body-spacing')) || 4,
         titleFont: {
-          family: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-title-font-family') || fromCss(ctx.chart.canvas, '--chartjs-font-family') || defaultFamily,
-          size: (ctx) => parseInt(fromCss(ctx.chart.canvas, '--chartjs-tooltip-title-font-size') || fromCss(ctx.chart.canvas, '--chartjs-font-size')) || 12,
-          weight: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-title-font-weight') || 'bold'
+          family: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-font-family') || defaultFamily,
+          size: 12,
+          weight: '600'
         },
         bodyFont: {
-          family: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-body-font-family') || fromCss(ctx.chart.canvas, '--chartjs-font-family') || defaultFamily,
-          size: (ctx) => parseInt(fromCss(ctx.chart.canvas, '--chartjs-tooltip-body-font-size') || fromCss(ctx.chart.canvas, '--chartjs-font-size')) || 12,
-          weight: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-tooltip-body-font-weight') || fromCss(ctx.chart.canvas, '--chartjs-font-weight')
+          family: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-font-family') || defaultFamily,
+          size: 12,
+          weight: '400'
         }
       },
       legend: {
         display: false
       },
       title: {
-        display: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-title-display') == 'true',
-        align: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-title-align') || 'center',
-        color: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-title-font-color') || fromCss(ctx.chart.canvas, '--chartjs-color') || fromCss(ctx.chart.canvas, 'color'),
-        position: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-title-position') || 'top',
-        font: {
-          family: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-title-font-family') || fromCss(ctx.chart.canvas, '--chartjs-font-family') || defaultFamily,
-          size: (ctx) => parseInt(fromCss(ctx.chart.canvas, '--chartjs-title-font-size') || fromCss(ctx.chart.canvas, '--chartjs-font-size')) || 12,
-          weight: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-title-font-weight') || 'bold'
-        }
+        display: false
       }
     },
     scales: {
@@ -168,71 +165,70 @@ const chartOptions = (mode) => {
         type: 'timeseries',
         min: new Date().getTime() - (60 * 1000),
         grid: {
-          color: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-grid-color')
+          color: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-grid-color') || 'rgba(255, 255, 255, 0.05)'
         },
         ticks: {
-          min: 12,
+          maxTicksLimit: 5,
           source: 'data',
-          color: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-axis-font-color') || fromCss(ctx.chart.canvas, '--chartjs-color') || fromCss(ctx.chart.canvas, 'color'),
+          color: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-axis-font-color') || 'rgba(220, 220, 226, 0.45)',
           font: {
-            family: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-axis-font-family') || fromCss(ctx.chart.canvas, '--chartjs-font-family') || defaultFamily,
-            size: (ctx) => parseInt(fromCss(ctx.chart.canvas, '--chartjs-axis-font-size') || fromCss(ctx.chart.canvas, '--chartjs-font-size')) || 12,
-            weight: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-axis-font-weight') || fromCss(ctx.chart.canvas, '--chartjs-font-weight')
+            family: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-font-family') || defaultFamily,
+            size: 11
           }
         }
       }
     },
     elements: {
       line: {
-        tension: 0.3
+        tension: 0.35,
+        borderWidth: 2,
+        fill: true
       },
       point: {
         pointStyle: false,
-        hoverRadius: 20
+        hoverRadius: 16
       }
     }
   }
 
   if (mode === 'memory') {
-    options.plugins.title.text = t('servers.Memory')
     options.scales.memory = {
       type: 'linear',
-      position: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-axis-y-position') || 'left',
+      position: 'right',
       min: 0,
       suggestedMax: 1024 * 1024,
       grid: {
         display: true,
-        color: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-grid-color')
+        color: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-grid-color') || 'rgba(255, 255, 255, 0.05)'
       },
       ticks: {
+        maxTicksLimit: 4,
         callback: formatMemory,
-        color: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-axis-font-color') || fromCss(ctx.chart.canvas, '--chartjs-color') || fromCss(ctx.chart.canvas, 'color'),
+        color: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-axis-font-color') || 'rgba(220, 220, 226, 0.45)',
         font: {
-          family: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-axis-font-family') || fromCss(ctx.chart.canvas, '--chartjs-font-family') || defaultFamily,
-          size: (ctx) => parseInt(fromCss(ctx.chart.canvas, '--chartjs-axis-font-size') || fromCss(ctx.chart.canvas, '--chartjs-font-size')) || 12,
-          weight: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-axis-font-weight') || fromCss(ctx.chart.canvas, '--chartjs-font-weight')
+          family: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-font-family') || defaultFamily,
+          size: 11
         }
       }
     }
   }
 
   if (mode === 'cpu') {
-    options.plugins.title.text = t('servers.CPU')
     options.scales.cpu = {
       type: 'linear',
-      position: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-axis-y-position') || 'left',
+      position: 'right',
       min: 0,
       suggestedMax: 100,
       grid: {
-        color: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-grid-color')
+        color: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-grid-color') || 'rgba(255, 255, 255, 0.05)'
       },
       ticks: {
+        maxTicksLimit: 4,
         callback: formatCpu,
-        color: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-axis-font-color') || fromCss(ctx.chart.canvas, '--chartjs-color') || fromCss(ctx.chart.canvas, 'color'),
+        color: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-axis-font-color') || 'rgba(220, 220, 226, 0.45)',
         font: {
-          family: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-axis-font-family') || fromCss(ctx.chart.canvas, '--chartjs-font-family') || defaultFamily,
-          size: (ctx) => parseInt(fromCss(ctx.chart.canvas, '--chartjs-axis-font-size') || fromCss(ctx.chart.canvas, '--chartjs-font-size')) || 12,
-          weight: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-axis-font-weight') || fromCss(ctx.chart.canvas, '--chartjs-font-weight')
+          family: (ctx) => fromCss(ctx.chart.canvas, '--chartjs-font-family') || defaultFamily,
+          size: 11
         }
       }
     }
@@ -243,7 +239,7 @@ const chartOptions = (mode) => {
 
 let task = null
 let stopListener = null
-onMounted(() => {
+onMounted(async () => {
   cpuChart = new Chart(cpuChartEl.value, {
     type: 'line',
     options: chartOptions('cpu'),
@@ -252,8 +248,9 @@ onMounted(() => {
         {
           label: t('servers.CPU'),
           yAxisID: 'cpu',
-          borderColor: fromCss(cpuChartEl.value, '--chartjs-series-line-cpu'),
-          backgroundColor: fromCss(cpuChartEl.value, '--chartjs-series-fill-cpu'),
+          fill: 'origin',
+          borderColor: fromCss(cpuChartEl.value, '--chartjs-series-line-cpu') || '#589284',
+          backgroundColor: fromCss(cpuChartEl.value, '--chartjs-series-fill-cpu') || 'rgba(88, 146, 132, 0.16)',
           data: cpu
         }
       ]
@@ -265,7 +262,7 @@ onMounted(() => {
     options: chartOptions('memory'),
     data: {
       datasets: [
-      {
+        {
           label: t('servers.JvmMetaUsed'),
           yAxisID: 'memory',
           fill: 'origin',
@@ -308,8 +305,9 @@ onMounted(() => {
         {
           label: t('servers.Memory'),
           yAxisID: 'memory',
-          borderColor: fromCss(memoryChartEl.value, '--chartjs-series-line-memory'),
-          backgroundColor: fromCss(memoryChartEl.value, '--chartjs-series-fill-memory'),
+          fill: 'origin',
+          borderColor: fromCss(memoryChartEl.value, '--chartjs-series-line-memory') || '#5b82a6',
+          backgroundColor: fromCss(memoryChartEl.value, '--chartjs-series-fill-memory') || 'rgba(91, 130, 166, 0.16)',
           data: memory
         }
       ]
@@ -318,9 +316,21 @@ onMounted(() => {
 
   stopListener = props.server.on('stat', addData)
 
+  if (props.server.hasScope('server.stats')) {
+    try {
+      addData(await props.server.getStats())
+    } catch {
+      // ignore if offline
+    }
+  }
+
   task = props.server.startTask(async () => {
     if (props.server.needsPolling() && props.server.hasScope('server.stats')) {
-      addData(await props.server.getStats())
+      try {
+        addData(await props.server.getStats())
+      } catch {
+        // ignore
+      }
     }
   }, 5000)
 })
@@ -334,11 +344,28 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <Query :server="server" />
-  <div class="chart memory">
-    <canvas ref="memoryChartEl"/>
-  </div>
-  <div class="chart cpu">
-    <canvas ref="cpuChartEl"/>
+  <div :class="['server-stats-panel', compact ? 'is-compact' : 'is-full']">
+    <Query v-if="!compact" :server="server" />
+    <div class="stats-charts-grid">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">{{ t('servers.CPU') }} Load</span>
+          <span class="chart-card-metric">{{ latestCpu }}</span>
+        </div>
+        <div class="chart cpu">
+          <canvas ref="cpuChartEl" />
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">{{ t('servers.Memory') }}</span>
+          <span class="chart-card-metric">{{ latestMemory }}</span>
+        </div>
+        <div class="chart memory">
+          <canvas ref="memoryChartEl" />
+        </div>
+      </div>
+    </div>
   </div>
 </template>

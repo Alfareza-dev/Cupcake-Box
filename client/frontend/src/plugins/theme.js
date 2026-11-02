@@ -9,13 +9,13 @@ let api = null
 let config = null
 let userSettings = null
 
-const generatedStyles = document.createElement('style')
-generatedStyles.id = 'generated-styles'
-document.head.append(generatedStyles)
-
 const styles = document.createElement('style')
 styles.id = 'styles'
 document.head.append(styles)
+
+const generatedStyles = document.createElement('style')
+generatedStyles.id = 'generated-styles'
+document.head.append(generatedStyles)
 
 const activeTheme = ref('')
 const themeSettings = ref({})
@@ -40,6 +40,8 @@ function getDefaultValue(name, definition) {
     }
     case 'color':
       return definition.default
+    case 'text':
+      return definition.default || ''
     default:
       return null
   }
@@ -47,6 +49,11 @@ function getDefaultValue(name, definition) {
 
 function handleSetting(name, definition, value, extra = {}) {
   if (value == undefined) value = getDefaultValue(name, definition)
+  if ((definition.type === 'class' || definition.type === 'snippet') && Array.isArray(definition.options)) {
+    if (!definition.options.some(opt => opt.value === value)) {
+      value = getDefaultValue(name, definition)
+    }
+  }
   switch (definition.type) {
     case 'class':
       rootClasses.value.push(value)
@@ -55,7 +62,7 @@ function handleSetting(name, definition, value, extra = {}) {
       try {
         const derive = Array.isArray(definition.derive) ? definition.derive : []
         const derived = derive.map(d => deriveColor(value, d)).join('\n')
-        appendStyle(`#app {\n${definition.var}: ${value};\n${derived}}`)
+        appendStyle(`#app {\n${definition.var}: ${value};\n--accent: ${value};\n${derived}}`)
       } catch (e) {
         if (!extra.isRetry) {
           console.warn('Applying requested color setting failed', e)
@@ -67,6 +74,8 @@ function handleSetting(name, definition, value, extra = {}) {
       break
     case 'snippet':
       appendStyle(value)
+      break
+    case 'text':
       break
     default:
       throw new Error(`type '${definition.type}' for setting ${name} is not a valid setting type`)
@@ -144,7 +153,7 @@ const themeApi = {
     }
     if (theme === activeTheme.value) {
       for (const setting in definition) {
-        definition[setting].current = themeSettings.value[setting] || getDefaultValue(setting, definition[setting])
+        definition[setting].current = themeSettings.value[setting] ?? getDefaultValue(setting, definition[setting])
       }
     } else {
       for (const setting in definition) {
@@ -153,13 +162,14 @@ const themeApi = {
     }
     return definition
   },
+  getCurrentSettings: () => ({ ...themeSettings.value }),
   setThemeSettings: (settings, save = true) => {
     themeApi.setTheme(activeTheme.value, settings, save)
   },
   serializeThemeSettings: (settings) => {
     const res = {}
     Object.keys(settings).map(key => {
-      if (settings[key].current) res[key] = settings[key].current
+      if (settings[key] && settings[key].current !== undefined) res[key] = settings[key].current
     })
     return JSON.stringify(res)
   },
@@ -216,6 +226,7 @@ export default (conf) => {
       config = conf
       app.config.globalProperties.$theme = themeApi
       app.provide('theme', themeApi)
+      app.provide('themeSettings', themeSettings)
       app.provide('themeClasses', rootClasses)
       app.provide('sidebarClosedBelow', sidebarClosedBelow)
       config.themes.available.filter(e => e !== 'PufferPanel').map(e => availableThemes.push(e))

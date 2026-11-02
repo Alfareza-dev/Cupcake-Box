@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 import ServerHeader from '../server/Header.vue'
+import ServerStatsStrip from '../server/ServerStatsStrip.vue'
+import { setServerNav, clearServerNav, serverNav } from '@/utils/serverNav'
 
 import Btn from '@/components/ui/Btn.vue'
 import Icon from '@/components/ui/Icon.vue'
@@ -54,11 +56,27 @@ const route = useRoute()
 const router = useRouter()
 const http = ref(false)
 const httpWarnDismissed = ref(false)
+const activeTab = ref('console')
 let httpCount = 2
 
 const props = defineProps({
   server: { type: Object, required: true }
 })
+
+function onTabsReady({ tabs, activeKey, setActive }) {
+  activeTab.value = activeKey || 'console'
+  setServerNav({
+    server: props.server,
+    tabs,
+    activeTab: activeTab.value,
+    selectTab: setActive
+  })
+}
+
+function onTabChanged(newKey) {
+  activeTab.value = newKey
+  serverNav.activeTab = newKey
+}
 
 let task = null
 onMounted(() => {
@@ -67,7 +85,7 @@ onMounted(() => {
       'confirm',
       {
         title: t('servers.InstallPrompt'),
-        body: t('servers.InstallPromptBody'),
+        body: t('servers.InstallPromptBody')
       },
       {
         text: t('servers.Install'),
@@ -80,11 +98,10 @@ onMounted(() => {
         color: 'neutral'
       }
     )
-    router.push({query: {}, hash: route.hash})
+    router.push({ query: {}, hash: route.hash })
   }
 
   task = props.server.startTask(() => {
-    // prevent the info alert from flickering on and off too much when dealing with a wonky connection
     if (props.server.needsPolling() && httpCount < 3) httpCount += 1
     if (!props.server.needsPolling() && httpCount > 0) httpCount -= 1
     if (httpCount === 3) http.value = true
@@ -93,15 +110,17 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  clearServerNav()
   if (task) props.server.stopTask(task)
 })
 </script>
 
 <template>
-  <div :class="http ? 'http-fallback' : ''">
-    <server-header :key="nameUpdateHack" :server="server" />
+  <div :class="['studio-server-layout', http ? 'http-fallback' : '']">
+    <server-header :server="server" />
+    <ServerStatsStrip :server="server" />
 
-    <tabs anchors>
+    <tabs anchors server-sidebar @tabsReady="onTabsReady" @tabChanged="onTabChanged">
       <tab
         v-if="server.hasScope('server.console') || server.hasScope('server.console.send')"
         id="console"
@@ -111,18 +130,9 @@ onUnmounted(() => {
       >
         <div v-if="http && !httpWarnDismissed" class="alert info">
           <span v-text="t('servers.SocketWarnConsole')" />
-          <btn variant="icon" @click="httpWarnDismissed = true"><icon name="close"></icon></btn>
+          <btn variant="icon" @click="httpWarnDismissed = true"><icon name="close" /></btn>
         </div>
         <Console :server="server" />
-      </tab>
-      <tab
-        v-if="server.hasScope('server.stats')"
-        id="stats"
-        :title="t('servers.Statistics')"
-        icon="stats"
-        hotkey="t i"
-      >
-        <stats :server="server" />
       </tab>
       <tab
         v-if="server.hasScope('server.files.view')"
@@ -132,6 +142,15 @@ onUnmounted(() => {
         hotkey="t f"
       >
         <files :server="server" />
+      </tab>
+      <tab
+        v-if="server.hasScope('server.stats')"
+        id="stats"
+        :title="t('servers.Statistics')"
+        icon="stats"
+        hotkey="t i"
+      >
+        <stats :server="server" />
       </tab>
       <tab
         v-if="server.hasScope('server.data.view') || server.hasScope('server.flags.view')"
@@ -151,7 +170,6 @@ onUnmounted(() => {
       >
         <users :server="server" />
       </tab>
-      <!-- currently disabled due to tasks being broken -->
       <tab
         v-if="false && server.hasScope('server.tasks.view')"
         id="tasks"

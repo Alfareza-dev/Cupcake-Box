@@ -60,32 +60,42 @@ function setFirstEntry(ref) {
 }
 
 function focusList() {
-  firstEntry.value.$el.focus()
+  if (firstEntry.value && firstEntry.value.$el) firstEntry.value.$el.focus()
 }
 </script>
 
 <template>
-  <div class="userlist">
-    <h1 v-text="t('users.Users')" />
+  <div class="userlist studio-resource-list">
+    <div class="studio-list-header">
+      <div class="header-title-group">
+        <h1 v-text="t('users.Users')" />
+        <span v-if="users.length > 0" class="count-pill">{{ users.length }}</span>
+      </div>
+      <router-link
+        v-if="$api.auth.hasScope('users.info.edit')"
+        v-hotkey="'c'"
+        :to="{ name: 'UserCreate' }"
+        class="studio-add-btn"
+      >
+        <icon name="plus" />
+        <span>{{ t('users.Add') }}</span>
+      </router-link>
+    </div>
     <div v-hotkey="'l'" class="list" @hotkey="focusList()">
       <div v-for="user in users" :key="user.id" class="list-item">
         <router-link :ref="setFirstEntry" :to="{ name: 'UserView', params: { id: user.id } }">
-          <div class="user">
+          <div class="user studio-resource-card">
             <img :src="'https://www.gravatar.com/avatar/' + md5(user.email) + '?d=mp'" class="avatar" />
-            <div>
-              <span class="title">{{user.username}}{{ $api.auth.hasScope('users.perms.view') && user.otpActive ? ' (' + t('users.OtpAbreviated') + ')' : '' }}</span>
-              <span class="subline">{{user.email}}</span>
+            <div class="resource-info">
+              <span class="title">{{ user.username }}{{ $api.auth.hasScope('users.perms.view') && user.otpActive ? ' (' + t('users.OtpAbreviated') + ')' : '' }}</span>
+              <span class="subline">{{ user.email }}</span>
             </div>
+            <icon name="chevron-right" class="resource-chevron" />
           </div>
         </router-link>
       </div>
       <div v-if="!allUsersLoaded" ref="loaderRef" class="list-item">
         <loader small />
-      </div>
-      <div v-if="$api.auth.hasScope('users.info.edit')" class="list-item">
-        <router-link v-hotkey="'c'" :to="{ name: 'UserCreate' }">
-          <div class="createLink"><icon name="plus" />{{ t('users.Add') }}</div>
-        </router-link>
       </div>
     </div>
   </div>

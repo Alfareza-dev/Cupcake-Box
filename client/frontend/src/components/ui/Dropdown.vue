@@ -38,14 +38,14 @@ export default {
 
 <template>
   <div class="dropdown-wrapper">
+    <label v-if="label" :class="['studio-field-top-label', isOpen ? 'dropdown-open' : 'dropdown-closed', error ? 'error' : '']" :for="id" @click="ms.open()">{{ label }}</label>
     <div :class="['dropdown', error ? 'error' : '']">
       <icon v-if="icon" class="pre" :name="icon" />
-      <multiselect :id="id" ref="ms" :model-value="modelValue" :label="labelProp"  mode="single" :can-deselect="false" :can-clear="false" :options="options" :object="object" :placeholder="label" @input="$emit('update:modelValue', $event); $emit('change', $event)" @open="$nextTick(() => isOpen = true)" @close="isOpen = false">
+      <multiselect :id="id" ref="ms" :model-value="modelValue" :label="labelProp" mode="single" :can-deselect="false" :can-clear="false" :options="options" :object="object" :placeholder="label" @input="$emit('update:modelValue', $event); $emit('change', $event)" @open="$nextTick(() => isOpen = true)" @close="isOpen = false">
         <template v-for="(index, name) in $slots" #[name]="data">
           <slot :name="name" v-bind="data"></slot>
         </template>
       </multiselect>
-      <label v-if="label" :class="[isOpen ? 'dropdown-open' : 'dropdown-closed', modelValue === null ? 'dropdown-placeholder' : '']" :for="id" @click="ms.open()">{{ label }}</label>
     </div>
     <span v-if="error" class="error" v-text="error" />
     <!-- eslint-disable-next-line vue/no-v-html -->

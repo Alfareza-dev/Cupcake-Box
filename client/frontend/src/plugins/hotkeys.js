@@ -15,12 +15,17 @@ function registerHotkey (el, keys, vnode) {
 
 // looking at vue internals isn't great, but i've not found a better way to do this yet
 function getGroup(i, route) {
+  if (!i) return 'root'
   let r = route
   if (!r) r = i.$route
-  const rootId = i._.root.uid
-  if (i._.uid === rootId) return 'root'
-  if ((i._.type || {}).name === 'RouterView') return r.name
-  return getGroup(i._.parent.ctx, r)
+  const internal = i.$ || i._
+  if (!internal || !internal.root) return 'root'
+  const rootId = internal.root.uid
+  if (internal.uid === rootId) return 'root'
+  if ((internal.type || {}).name === 'RouterView') return r ? r.name : 'root'
+  const parent = internal.parent
+  if (!parent) return 'root'
+  return getGroup(parent.proxy || parent.ctx || parent, r)
 }
 
 export default {

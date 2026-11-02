@@ -7,6 +7,7 @@ const props = defineProps({
   // default to random id as labels need target ids to exist exactly once
   id: { type: String, default: () => (Math.random() + 1).toString(36).substring(2) },
   label: { type: String, default: () => undefined },
+  placeholder: { type: String, default: () => undefined },
   hint: { type: String, default: () => undefined },
   error: { type: String, default: () => undefined },
   name: { type: String, default: () => undefined },
@@ -54,12 +55,12 @@ defineExpose({focus})
 
 <template>
   <div class="input-field-wrapper" @click="input.focus()">
+    <label v-if="label" :class="['studio-field-top-label', error ? 'error' : '']" :for="id"><span v-text="label" /></label>
     <div :class="['input-field', 'input-' + type, error ? 'error' : '', disabled ? 'disabled' : '']">
       <icon v-if="icon" class="pre" :name="icon" />
-      <input :id="id" ref="input" :value="modelValue" :type="showPassword ? 'text' : type" :placeholder="label" :name="name" :disabled="disabled" @input="onInput($event)" @blur="onBlur($event)" @focus="onFocus($event)" />
+      <input :id="id" ref="input" :value="modelValue" :type="showPassword ? 'text' : type" :placeholder="placeholder || ''" :name="name" :disabled="disabled" @input="onInput($event)" @blur="onBlur($event)" @focus="onFocus($event)" />
       <icon v-if="type === 'password'" class="post btn" :name="showPassword ? 'eye-off' : 'eye'" @click="showPassword = !showPassword" />
-      <template v-else><icon class="post" :name="afterIcon" /><span v-if="afterHint" class="post-tooltip" :data-tooltip="afterHint" /></template>
-      <label v-if="label" :for="id"><span v-text="label" /></label>
+      <template v-else-if="afterIcon"><icon class="post" :name="afterIcon" /><span v-if="afterHint" class="post-tooltip" :data-tooltip="afterHint" /></template>
     </div>
     <span v-if="error" class="error" v-text="error" />
     <!-- eslint-disable-next-line vue/no-v-html -->

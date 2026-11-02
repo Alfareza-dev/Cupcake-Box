@@ -16,11 +16,13 @@ function onInput() {
 </script>
 
 <template>
-  <label class="switch-wrapper">
+  <label :class="['switch-wrapper', (!label && !hint) ? 'switch-compact' : '']">
     <input type="checkbox" :disabled="disabled" :checked="modelValue" @input="onInput" />
     <span :class="['switch', disabled ? 'disabled' : '']" />
-    <div class="label" v-text="label" />
-    <!-- eslint-disable-next-line vue/no-v-html -->
-    <div v-if="hint" class="hint" v-html="markdown(hint)" />
+    <span v-if="label || hint" class="switch-body">
+      <span v-if="label" class="label" v-text="label" />
+      <!-- eslint-disable-next-line vue/no-v-html -->
+      <span v-if="hint" class="hint" v-html="markdown(hint)" />
+    </span>
   </label>
 </template>

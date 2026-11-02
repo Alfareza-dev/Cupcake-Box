@@ -1,13 +1,20 @@
 <script setup>
-import { ref, inject, nextTick } from 'vue'
+import { ref, computed, inject, nextTick } from 'vue'
 import { useRouter, RouterLink } from 'vue-router';
 import { useI18n } from 'vue-i18n'
+import Icon from './Icon.vue'
 import Loader from './Loader.vue'
 import TextField from './TextField.vue'
 
 const api = inject('api')
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
+
+const searchPlaceholder = computed(() =>
+  String(locale.value || '').startsWith('id')
+    ? 'Cari server, node, pengguna...'
+    : 'Search servers, nodes, users...'
+)
 
 let timeout = null
 
@@ -191,9 +198,32 @@ function link(index, to) {
 
 <template>
   <span class="global-search">
-    <text-field v-model="query" v-hotkey="'/'" icon="search" @change="input()" @blur="cancel()" @keyup.up="up()" @keyup.down="down()" @keyup.enter="go()" @keyup.esc="close()" />
+    <div class="global-search-box">
+      <text-field
+        v-model="query"
+        v-hotkey="'/'"
+        icon="search"
+        :placeholder="searchPlaceholder"
+        @change="input()"
+        @blur="cancel()"
+        @keyup.up="up()"
+        @keyup.down="down()"
+        @keyup.enter="go()"
+        @keyup.esc="close()"
+      />
+      <button
+        v-if="query.length > 0"
+        type="button"
+        class="search-clear-btn"
+        aria-label="Clear search"
+        @mousedown.prevent="close()"
+      >
+        <icon name="close" />
+      </button>
+      <kbd v-else class="search-shortcut-hint">/</kbd>
+    </div>
     <div v-if="active && loading" class="results">
-      <loader />
+      <loader small />
     </div>
     <div v-if="active && !loading" ref="containerRef" class="results">
       <div v-if="servers.length > 0" class="server-results">

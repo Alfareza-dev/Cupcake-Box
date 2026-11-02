@@ -1,68 +1,98 @@
 {
   "keepDefaultCss": true,
-  "sidebarClosedBelow": 1200,
+  "sidebarClosedBelow": 1100,
   "settings": {
-    "mode": {
+    "baseTone": {
       "type": "class",
-      "tkey": "common.theme.Mode",
+      "ui": "tone-cards",
+      "label": "Base tone",
       "options": [
         {
-          "value": "mode-auto",
-          "tkey": "common.theme.mode.Auto",
+          "value": "tone-graphite",
+          "label": "Graphite (warm)",
           "default": true
         },
         {
-          "value": "mode-light",
-          "tkey": "common.theme.mode.Light"
+          "value": "tone-slate",
+          "label": "Slate (cool)"
         },
         {
-          "value": "mode-dark",
-          "tkey": "common.theme.mode.Dark"
-        },
-        {
-          "value": "mode-dark-highcontrast",
-          "tkey": "common.theme.mode.DarkHighContrast"
+          "value": "tone-midnight",
+          "label": "Midnight"
         }
       ]
     },
-    "color": {
+    "accentColor": {
       "type": "color",
+      "ui": "accent-presets",
       "var": "--primary",
-      "default": "#07a7e3",
+      "default": "#589284",
+      "label": "Accent colour",
+      "presets": [
+        { "name": "Sage", "value": "#589284" },
+        { "name": "Steel", "value": "#5b82a6" },
+        { "name": "Ochre", "value": "#b89356" },
+        { "name": "Terracotta", "value": "#b86f5c" },
+        { "name": "Iris", "value": "#8673a8" },
+        { "name": "Moss", "value": "#6d9658" }
+      ],
       "derive": [
         {
           "type": "contrast",
           "foreground": true,
-          "options": ["#eee", "#333"],
+          "options": ["#f4f6f8", "#141618"],
           "var": "--text-primary"
+        },
+        {
+          "type": "lightness",
+          "delta": 0.42,
+          "satScale": 0.92,
+          "var": "--accent-lighter"
+        },
+        {
+          "type": "lightness",
+          "delta": 0.22,
+          "satScale": 0.96,
+          "var": "--accent-light"
+        },
+        {
+          "type": "lightness",
+          "delta": -0.18,
+          "var": "--accent-dark"
+        },
+        {
+          "type": "lightness",
+          "delta": -0.35,
+          "satScale": 1.02,
+          "var": "--accent-darker"
         },
         {
           "type": "opacity",
           "opacity": 0.15,
           "var": "--primary-hover"
-        }
-      ],
-      "tkey": "common.theme.BaseColor"
-    },
-    "serverTypeDisplay": {
-      "type": "class",
-      "tkey": "common.theme.ServerTypeDisplay",
-      "options": [
-        {
-          "value": "server-type-icon",
-          "tkey": "common.theme.serverTypeDisplay.IconBackground",
-          "default": true
         },
         {
-          "value": "server-type-icon server-type-nobackground",
-          "tkey": "common.theme.serverTypeDisplay.Icon",
-          "default": true
+          "type": "opacity",
+          "opacity": 0.15,
+          "var": "--accent-subtle"
         },
         {
-          "value": "server-type-none",
-          "tkey": "common.theme.serverTypeDisplay.None"
+          "type": "opacity",
+          "opacity": 0.24,
+          "var": "--accent-muted"
+        },
+        {
+          "type": "opacity",
+          "opacity": 0.4,
+          "var": "--accent-border"
         }
       ]
+    },
+    "logoUrl": {
+      "type": "text",
+      "label": "Logo URL",
+      "hint": "Optional. Shown instead of the panel name in the top bar. A light logo on a transparent background (~28px high) works best.",
+      "default": ""
     },
     "listType": {
       "type": "class",
@@ -70,7 +100,7 @@
       "options": [
         {
           "value": "list-type-grid",
-          "tkey": "common.theme.listType.Grid",
+          "label": "Large cards (2 per row)",
           "default": true
         },
         {
@@ -83,14 +113,6 @@
       "type": "snippet",
       "tkey": "common.theme.FontSize",
       "options": [
-        {
-          "value": ":root{font-size: calc(100% + 8px)}",
-          "label": "+4"
-        },
-        {
-          "value": ":root{font-size: calc(100% + 6px)}",
-          "label": "+3"
-        },
         {
           "value": ":root{font-size: calc(100% + 4px)}",
           "label": "+2"
@@ -107,10 +129,6 @@
         {
           "value": ":root{font-size: calc(100% - 2px)}",
           "label": "-1"
-        },
-        {
-          "value": ":root{font-size: calc(100% - 4px)}",
-          "label": "-2"
         }
       ]
     },

@@ -150,27 +150,35 @@ function togglePermission(scope) {
 </script>
 
 <template>
-  <div class="userview">
-    <div v-if="$api.auth.hasScope('users.info.view')" class="details">
-      <h1 v-text="t('users.Details')" />
+  <div class="userview studio-userview-stacked">
+    <div v-if="$api.auth.hasScope('users.info.view')" class="details accent-top-card">
+      <div class="userview-card-header">
+        <h1 v-text="t('users.Details')" />
+        <span v-if="$api.auth.hasScope('users.perms.view')" :class="['otp-status-badge', otpActive ? 'active' : 'inactive']">
+          <icon name="lock" />
+          <span>{{ t('users.OtpEnabled') }}: {{ otpActive ? t('common.Yes') : t('common.No') }}</span>
+        </span>
+      </div>
       <form @submit.prevent="submitDetails()">
-        <text-field
-          v-model="username"
-          :label="t('users.Username')"
-          icon="account"
-          :error="usernameError"
-          :disabled="!$api.auth.hasScope('users.info.edit')"
-          @blur="usernameError = validate.username(username) ? '' : t('errors.ErrUsernameRequirements')"
-        />
-        <text-field
-          v-model="email"
-          :label="t('users.Email')"
-          type="email"
-          icon="email"
-          :error="emailError"
-          :disabled="!$api.auth.hasScope('users.info.edit')"
-          @blur="emailError = validate.email(email) ? '' : t('errors.ErrEmailInvalid')"
-        />
+        <div class="userview-fields-grid">
+          <text-field
+            v-model="username"
+            :label="t('users.Username')"
+            icon="account"
+            :error="usernameError"
+            :disabled="!$api.auth.hasScope('users.info.edit')"
+            @blur="usernameError = validate.username(username) ? '' : t('errors.ErrUsernameRequirements')"
+          />
+          <text-field
+            v-model="email"
+            :label="t('users.Email')"
+            type="email"
+            icon="email"
+            :error="emailError"
+            :disabled="!$api.auth.hasScope('users.info.edit')"
+            @blur="emailError = validate.email(email) ? '' : t('errors.ErrEmailInvalid')"
+          />
+        </div>
         <text-field
           v-if="$api.auth.hasScope('users.info.edit')"
           v-model="password"
@@ -180,29 +188,32 @@ function togglePermission(scope) {
           :error="passwordError"
           @blur="passwordError = (validate.password(password) || password.length === 0) ? '' : t('error.PasswordInvalid')"
         />
-        <div v-if="$api.auth.hasScope('users.perms.view')">
-          <h2>{{ t('users.OtpEnabled') }}: {{ otpActive ? t('common.Yes') : t('common.No') }}</h2>
+        <div v-if="$api.auth.hasScope('users.info.edit')" class="userview-actions">
+          <btn color="primary" :disabled="!canSubmitDetails()" @click="submitDetails()"><icon name="save" />{{ t('users.UpdateDetails') }}</btn>
+          <btn color="error" @click="deleteUser()"><icon name="remove" />{{ t('users.Delete') }}</btn>
         </div>
-        <btn v-if="$api.auth.hasScope('users.info.edit')" color="primary" :disabled="!canSubmitDetails()" @click="submitDetails()"><icon name="save" />{{ t('users.UpdateDetails') }}</btn>
-        <btn v-if="$api.auth.hasScope('users.info.edit')" color="error" @click="deleteUser()"><icon name="remove" />{{ t('users.Delete') }}</btn>
       </form>
     </div>
 
-    <div v-if="$api.auth.hasScope('users.perms.view')" class="permissions">
+    <div v-if="$api.auth.hasScope('users.perms.view')" class="permissions accent-top-card">
       <h1 v-text="t('users.Permissions')" />
-      <div v-for="(scopeCat, catName) in scopes" :key="scopeCat">
+      <div v-for="(scopeCat, catName) in scopes" :key="catName" class="permission-category">
         <h3 v-if="catName !== 'general'" v-text="permissionCategoryHeading(catName)" />
-        <toggle
-          v-for="scope in scopeCat"
-          :key="scope"
-          :model-value="permissions.indexOf(scope) >= 0"
-          :disabled="permissionDisabled(scope)"
-          :label="scopeLabel(scope)"
-          :hint="scopeHint(scope)"
-          @update:modelValue="togglePermission(scope)"
-        />
+        <div class="permission-toggles-list">
+          <toggle
+            v-for="scope in scopeCat"
+            :key="scope"
+            :model-value="permissions.indexOf(scope) >= 0"
+            :disabled="permissionDisabled(scope)"
+            :label="scopeLabel(scope)"
+            :hint="scopeHint(scope)"
+            @update:modelValue="togglePermission(scope)"
+          />
+        </div>
       </div>
-      <btn v-if="api.auth.hasScope('user.perms.edit')" color="primary" @click="submitPermissions()"><icon name="save" />{{ t('users.UpdatePermissions') }}</btn>
+      <div v-if="api.auth.hasScope('user.perms.edit')" class="userview-actions">
+        <btn color="primary" @click="submitPermissions()"><icon name="save" />{{ t('users.UpdatePermissions') }}</btn>
+      </div>
     </div>
   </div>
 </template>

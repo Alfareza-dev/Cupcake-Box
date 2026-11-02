@@ -1,85 +1,100 @@
-@mixin dark {
-  --success-bg: #4caf5040;
-  --success: #4caf50;
-  --info-bg: #3b8db840;
-  --info: #3b8db8;
-  --warning-bg: #fbac0040;
-  --warning: #fbac00;
-  --error-bg: #fe424240;
-  --error: #fe4242;
-  --backdrop: #292929;
-  --background: #333;
-  --code-background: #1d1d1d;
-  --text: rgba(240, 240, 240, 0.87);
-  --text-disabled: rgba(240, 240, 240, 0.5);
-  --servertype-icon-filter: brightness(0.625);
-  --ace-theme: monokai;
-  --chartjs-tooltip-background-color: rgba(30, 30, 30, 0.7);
-  --chartjs-grid-color: rgba(0, 0, 0, 0.3);
-  --scrollshadow-color: #1d1d1d;
+@mixin studio-shared-tokens {
+  --primary: #589284;
+  --accent: #589284;
+  --accent-lighter: #9dc0b7;
+  --accent-light: #79a99d;
+  --accent-dark: #457469;
+  --accent-darker: #32554d;
+  --primary-hover: rgba(88, 146, 132, 0.14);
+  --accent-subtle: rgba(88, 146, 132, 0.14);
+  --accent-muted: rgba(88, 146, 132, 0.24);
+  --accent-border: rgba(88, 146, 132, 0.42);
+  --text-primary: #f4f7f6;
+
+  // Muted Studio status palette
+  --success: #529471;
+  --success-bg: rgba(82, 148, 113, 0.16);
+  --info: #5b82a6;
+  --info-bg: rgba(91, 130, 166, 0.16);
+  --warning: #b89356;
+  --warning-bg: rgba(184, 147, 86, 0.16);
+  --error: #b3564f;
+  --error-bg: rgba(179, 86, 79, 0.16);
+
+  --servertype-icon-filter: brightness(0.85) saturate(0.85);
+  --ace-theme: tomorrow_night_eighties;
 }
 
-@mixin dark-highcontrast {
-  --success-bg: #4caf5040;
-  --success: #4caf50;
-  --info-bg: #3b8db840;
-  --info: #3b8db8;
-  --warning-bg: #fbac0040;
-  --warning: #fbac00;
-  --error-bg: #fe424240;
-  --error: #fe4242;
-  --backdrop: #000;
-  --background: #000;
-  --code-background: #1d1d1d;
-  --text: rgba(240, 240, 240, 1);
-  --text-disabled: rgba(240, 240, 240, 0.66);
-  --servertype-icon-filter: none;
-  --ace-theme: vibrant_ink;
-  --chartjs-tooltip-background-color: rgba(30, 30, 30, 0.7);
-  --chartjs-grid-color: rgba(0, 0, 0, 0.3);
-  // indicating scroll with a shadows seems like a bad idea for high contrast
-  --scrollshadow-color: #0000;
+@mixin tone-graphite {
+  --backdrop: #141416;
+  --surface-sidebar: #18181b;
+  --background: #1f1f23;
+  --surface-elevated: #27272c;
+  --surface-sunken: #151518;
+  --code-background: #0d0d0f;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.13);
+  --text: #e6e6e9;
+  --text-muted: #9a9aa3;
+  --text-disabled: #6e6e78;
+  --chartjs-tooltip-background-color: rgba(20, 20, 23, 0.94);
+  --chartjs-grid-color: rgba(255, 255, 255, 0.05);
+  --scrollshadow-color: #141416;
 }
 
-@mixin light {
-  --success-bg: #4caf5040;
-  --success: #4caf50;
-  --info-bg: #21a1de40;
-  --info: #21a1de;
-  --warning-bg: #fb8c0040;
-  --warning: #fb8c00;
-  --error-bg: #dc313140;
-  --error: #dc3131;
-  --backdrop: #eee;
-  --background: #fff;
-  --code-background: #d9d9d9;
-  --text: rgba(16, 16, 16, 0.75);
-  --text-disabled: rgba(16, 16, 16, 0.5);
-  --servertype-icon-filter: saturate(0.85);
-  --ace-theme: github;
-  --chartjs-tooltip-background-color: rgba(220, 220, 220, 0.7);
-  --chartjs-grid-color: rgba(220, 220, 220, 0.7);
-  --scrollshadow-color: #d9d9d9;
+@mixin tone-slate {
+  --backdrop: #12151b;
+  --surface-sidebar: #161a21;
+  --background: #1c212a;
+  --surface-elevated: #242a35;
+  --surface-sunken: #13171e;
+  --code-background: #0b0e13;
+  --border: rgba(205, 220, 245, 0.08);
+  --border-strong: rgba(205, 220, 245, 0.15);
+  --text: #e4e8f0;
+  --text-muted: #949fb1;
+  --text-disabled: #667184;
+  --chartjs-tooltip-background-color: rgba(18, 22, 29, 0.94);
+  --chartjs-grid-color: rgba(205, 220, 245, 0.055);
+  --scrollshadow-color: #12151b;
 }
 
-.mode-dark {
-  @include dark;
+@mixin tone-midnight {
+  --backdrop: #0b0d12;
+  --surface-sidebar: #0f1118;
+  --background: #141720;
+  --surface-elevated: #1c202c;
+  --surface-sunken: #0d0f15;
+  --code-background: #07080c;
+  --border: rgba(195, 208, 240, 0.075);
+  --border-strong: rgba(195, 208, 240, 0.14);
+  --text: #e5e7ef;
+  --text-muted: #8f96ab;
+  --text-disabled: #5f667a;
+  --chartjs-tooltip-background-color: rgba(12, 14, 20, 0.95);
+  --chartjs-grid-color: rgba(195, 208, 240, 0.055);
+  --scrollshadow-color: #0b0d12;
 }
 
-.mode-dark-highcontrast {
-  @include dark-highcontrast;
+:root {
+  @include studio-shared-tokens;
 }
 
-.mode-light, .mode-auto {
-  @include light;
+#root,
+#root.tone-graphite,
+#root.mode-dark,
+#root.mode-auto,
+#root.mode-light {
+  @include tone-graphite;
 }
 
-.mode-auto {
-  @media (prefers-color-scheme: dark) {
-    @include dark;
-  }
+#root.tone-slate,
+.tone-slate {
+  @include tone-slate;
+}
 
-  @media (prefers-contrast: more) {
-    @include dark-highcontrast;
-  }
+#root.tone-midnight,
+#root.mode-dark-highcontrast,
+.tone-midnight {
+  @include tone-midnight;
 }

@@ -1,41 +1,41 @@
 @use '../mixins' as *;
 
-.dropdown {
-  position: relative;
-  display: inline-block;
-  width: 100%;
-  margin: 12px 0;
-  left: 0;
-}
-
-.dropdown label {
-  position: absolute;
-  left: 0.75rem;
-  top: -0.625rem;
-  background-color: var(--background);
-  color: var(--text);
-  padding: 0 .25rem;
-  transform-origin: top left;
-  transform: scale(.9);
-  transition: all 0.1s ease-in-out;
-}
-
-.dropdown label.dropdown-open {
-  color: var(--primary);
-}
-
-.dropdown label.dropdown-placeholder {
-  top: 1.05rem;
-  transform: scale(1);
-  color: var(--text-disabled);
-}
-
 .dropdown-wrapper {
+  display: block;
+  margin: 0.9rem 0;
+
+  > label,
+  .dropdown > label {
+    position: static;
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text);
+    background: transparent;
+    padding: 0;
+    margin: 0 0 0.42rem;
+    cursor: pointer;
+    transition: color 0.12s ease;
+
+    &.dropdown-open {
+      color: var(--accent-light, var(--primary));
+    }
+
+    &.error {
+      color: var(--error);
+    }
+  }
+
+  &:focus-within > label:not(.error) {
+    color: var(--accent-light, var(--primary));
+  }
+
   .hint {
     display: block;
-    margin-top: -6px;
-    margin-left: 1em;
-    margin-bottom: 12px;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    margin: 0.38rem 0.15rem 0;
     p {
       margin: 0;
       color: var(--text-disabled);
@@ -49,34 +49,28 @@
 
   span.error {
     display: block;
-    margin-top: -6px;
-    margin-left: 1em;
-    margin-bottom: 12px;
+    font-size: 0.79rem;
+    line-height: 1.4;
+    margin: 0.38rem 0.15rem 0;
   }
 }
 
+.dropdown {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin: 0;
+  left: 0;
+}
+
 html[dir="rtl"] {
+  .dropdown-wrapper > label {
+    text-align: right;
+  }
+
   .dropdown {
     right: 0;
     left: unset;
-  }
-
-  .dropdown label {
-    right: 0.75rem;
-    left: unset;
-    transform-origin: top right;
-  }
-
-  .dropdown-wrapper {
-    .hint {
-      margin-right: 1em;
-      margin-left: unset;
-    }
-
-    span.error {
-      margin-right: 1em;
-      margin-left: unset;
-    }
   }
 
   .multiselect-multiple-label,
@@ -84,52 +78,14 @@ html[dir="rtl"] {
     right: 0;
     left: unset;
   }
-
-  .multiselect-tag {
-    padding: 0.125rem 0.5rem 0.125rem 0;
-    margin-left: 0.15rem;
-    margin-right: unset;
-    &.is-disabled {
-      padding-left: 0.5rem;
-      padding-right: unset;
-    }
-  }
 }
 
 .dropdown.error {
-  .multiselect {
+  .multiselect-wrapper {
     border-color: var(--error);
-  
-    .multiselect-multiple-label,
-    .multiselect-single-label {
-      color: var(--error);
-    }
   }
 
-  .multiselect.is-active {
+  .multiselect.is-active .multiselect-wrapper {
     border-color: var(--primary);
-
-    .multiselect-multiple-label,
-    .multiselect-single-label {
-      color: var(--text);
-    }
-  }
-
-  label.dropdown-closed {
-    color: var(--error);
-  }
-
-  label.dropdown-open {
-    color: var(--primary);
-  }
-}
-
-@include high-contrast-mode {
-  .dropdown .is-open .multiselect-dropdown {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-left-radius: var(--border-radius);
-    border-bottom-right-radius: var(--border-radius);
-    border: 3px solid var(--primary);
   }
 }

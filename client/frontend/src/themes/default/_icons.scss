@@ -6783,6 +6783,39 @@ $mdi-icons: (
 .icon-path-separator {
   @include icon-name(chevron-right);
 }
+.icon-wifi {
+  @include icon-name(wifi);
+}
+.icon-clock {
+  @include icon-name(clock-outline);
+}
+.icon-cpu {
+  @include icon-name(cpu-64-bit);
+}
+.icon-memory {
+  @include icon-name(memory);
+}
+.icon-disk {
+  @include icon-name(harddisk);
+}
+.icon-network {
+  @include icon-name(server-network);
+}
+.icon-prompt {
+  @include icon-name(chevron-double-right);
+}
+.icon-shield {
+  @include icon-name(shield-check-outline);
+}
+.icon-key {
+  @include icon-name(key-variant);
+}
+.icon-arrow-right {
+  @include icon-name(arrow-right);
+}
+.icon-palette {
+  @include icon-name(palette-outline);
+}
 html[dir="ltr"] {
   .icon-back {
     @include icon-name(chevron-left);

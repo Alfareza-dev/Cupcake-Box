@@ -40,11 +40,11 @@
   "LocalNodeEdit": "The local node does not have any editable settings\n\nTo change the host displayed with servers hosted on this node adjust the panels master url in the panel settings",
   "Deploy": "Deploy Node",
   "deploy": {
-    "Step1": "## Step 1\n\nInstall PufferPanel on the new server, [see the docs for details](https://docs.pufferpanel.com/en/latest/installing.html)",
-    "Step2": "## Step 2\n\nStop the PufferPanel service on the new server if it was started during installation by running `sudo systemctl stop pufferpanel`",
-    "Step3": "## Step 3\n\nReplace the contents of the PufferPanel config file on the new server with the code below\n\nThe config file is usually found at `/etc/pufferpanel/config.json`\n\n```\n{config}\n```",
-    "Step4": "## Step 4\n\nEnable and (re)start the PufferPanel service on the new server by running `sudo systemctl enable --now pufferpanel`",
+    "Step1": "## Step 1\n\nInstall the Cupcake Box daemon on the new server.",
+    "Step2": "## Step 2\n\nStop the daemon service on the new server if it was started during installation by running `sudo systemctl stop pufferpanel`",
+    "Step3": "## Step 3\n\nReplace the contents of the node config file on the new server with the code below\n\nThe config file is usually found at `/etc/pufferpanel/config.json`\n\n```\n{config}\n```",
+    "Step4": "## Step 4\n\nEnable and (re)start the daemon service on the new server by running `sudo systemctl enable --now pufferpanel`",
     "Step5": "### Your new node is now set up and ready to go"
   },
-  "DeploymentInstruction": "To deploy the node, install PufferPanel on the new server and place the code below in `/etc/pufferpanel/config.json`  \nRestart PufferPanel on the new server afterwards."
+  "DeploymentInstruction": "To deploy the node, install the Cupcake Box daemon on the new server and place the code below in `/etc/pufferpanel/config.json`  \nRestart the daemon service on the new server afterwards."
 }

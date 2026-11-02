@@ -2,29 +2,39 @@
 
 .createLink {
   @include clickable;
-  @include link;
-  border: 2px dashed var(--primary);
-  color: var(--primary);
-  padding: 1.5em;
-  border-radius: var(--border-radius);
-  transition: background 0.1s ease-in-out;
+  display: flex;
+  align-items: center;
+  border: 1px dashed var(--accent-border, var(--border-strong));
+  background-color: var(--surface-sunken);
+  color: var(--accent-light, var(--primary));
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background-color: var(--accent-subtle, var(--primary-hover));
+    border-color: var(--primary);
+  }
+
   .icon::before {
-    color: var(--primary);
-    margin-right: 1.5em;
+    color: var(--accent-light, var(--primary));
+    margin-right: 0.65rem;
   }
 }
 
 .templatelist .repo.createLink {
   display: block;
-  padding: .75em;
-  margin-top: 3rem;
+  padding: 0.75em;
+  margin-top: 2rem;
   text-align: center;
   .icon::before {
-    margin-right: .5em;
+    margin-right: 0.5em;
   }
 }
 
 html[dir="rtl"] .createLink .icon {
-  margin-left: 1.5em;
+  margin-left: 0.65rem;
   margin-right: unset;
 }

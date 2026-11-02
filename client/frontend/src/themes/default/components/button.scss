@@ -1,142 +1,122 @@
 @use '../mixins' as *;
 
 .button {
-  border: none;
+  border: 1px solid transparent;
   width: 100%;
-  border-radius: var(--border-radius);
+  border-radius: 8px;
   font-family: var(--standard-font);
-  font-size: 1.125rem;
-  height: 3rem;
-  margin: 12px 0;
-  display: flex;
+  font-size: 0.875rem;
+  font-weight: 500;
+  height: 2.4rem;
+  margin: 8px 0;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
-  padding: 0 26px;
+  gap: 0.4rem;
+  padding: 0 18px;
   cursor: pointer;
   touch-action: manipulation;
   text-align: center;
   white-space: nowrap;
-  transition: all 0.1s ease-in-out;
+  transition: background-color 0.12s ease, border-color 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
+
   &:not(.icon) .icon::before {
-    font-size: 1.5em;
-    padding: 0 0.25rem;
+    font-size: 1.15em;
   }
 }
 
-#toasts .toast .button.toast, .alert .button {
+#toasts .toast .button.toast,
+.alert .button {
   width: unset;
   margin: 0 0 0 1em;
-  padding: 0 1em;
+  padding: 0 0.85em;
+  height: 2rem;
 }
 
-html[dir="rtl"] #toasts .toast .button.toast, html[dir="rtl"] .alert .button {
+html[dir="rtl"] #toasts .toast .button.toast,
+html[dir="rtl"] .alert .button {
   margin: 0 1em 0 0;
 }
 
 .button.neutral {
-  background-color: var(--backdrop);
+  background-color: var(--surface-elevated);
+  border-color: var(--border-strong);
   color: var(--text);
   .icon::before {
-    color: var(--text);
+    color: var(--text-muted);
+  }
+  &:hover:not(.disabled) {
+    background-color: rgba(255, 255, 255, 0.08);
   }
 }
 
 .button.primary {
   background-color: var(--primary);
+  border-color: var(--accent-border, transparent);
   color: var(--text-primary);
+  font-weight: 600;
   .icon::before {
     color: var(--text-primary);
   }
-}
-
-.button.primary:hover {
-  filter: brightness(0.9);
-}
-
-@include high-contrast-mode {
-  .button.primary {
-    background-color: var(--background);
-    border: 3px solid var(--primary);
-    color: var(--primary);
-    font-weight: bold;
-    .icon::before {
-      color: var(--primary);
-    }
-    &:hover {
-      text-decoration: underline dashed;
-    }
+  &:hover:not(.disabled) {
+    background-color: var(--accent-dark, var(--primary));
+    filter: brightness(1.06);
   }
 }
 
 .button.error {
-  background-color: var(--error);
-  color: var(--text-primary);
+  background-color: rgba(179, 86, 79, 0.22);
+  border-color: rgba(179, 86, 79, 0.45);
+  color: #f0b6b1;
+  font-weight: 600;
   .icon::before {
-    color: var(--text-primary);
+    color: #f0b6b1;
   }
-}
-
-.button.error:hover {
-  filter: brightness(0.9);
-}
-
-@include high-contrast-mode {
-  .button.error {
-    background-color: var(--background);
-    border: 3px solid var(--error);
-    color: var(--error);
-    font-weight: bold;
+  &:hover:not(.disabled) {
+    background-color: var(--error);
+    border-color: var(--error);
+    color: #fff;
     .icon::before {
-      color: var(--error);
-    }
-    &:hover {
-      text-decoration: underline dashed;
+      color: #fff;
     }
   }
 }
 
 .button.text {
   background-color: transparent;
-}
-
-.button.text:hover {
-  background-color: var(--primary-hover);
-}
-
-@include high-contrast-mode {
-  .button.text:hover {
-    background-color: unset;
-    text-decoration: underline dashed;
+  border-color: var(--border);
+  color: var(--text);
+  &:hover:not(.disabled) {
+    background-color: var(--accent-subtle, var(--primary-hover));
+    border-color: var(--accent-border, var(--border-strong));
   }
 }
 
 .button.disabled:not(.icon) {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--surface-sunken);
+  border-color: var(--border);
   color: var(--text-disabled);
+  cursor: not-allowed;
+  opacity: 0.65;
   box-shadow: none;
   .icon::before {
     color: var(--text-disabled);
   }
 }
 
-@include high-contrast-mode {
-  .button.disabled:not(.icon) {
-    border: 3px solid var(--text-disabled);
-  }
-}
-
 .button.icon {
-  min-width: 3rem;
-  width: 3rem;
-  padding: 9px;
+  min-width: 2.25rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 6px;
   margin: 0;
-  border-radius: 50%;
+  border-radius: 8px;
   background-color: transparent;
-  font-size: 1.5em;
+  font-size: 1.25em;
 }
 
 .button.icon:not(.disabled):hover {
-  background-color: var(--primary-hover);
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
 .button.icon.disabled {

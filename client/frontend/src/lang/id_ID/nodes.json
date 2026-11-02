@@ -40,11 +40,11 @@
   "LocalNodeEdit": "The local node does not have any editable settings\n\nTo change the host displayed with servers hosted on this node adjust the panels master url in the panel settings",
   "Deploy": "Deploy Node",
   "deploy": {
-    "Step1": "## Step 1\n\nInstall PufferPanel on the new server, [see the docs for details](https://docs.pufferpanel.com/en/latest/installing.html)",
-    "Step2": "## Step 2\n\nStop the PufferPanel service on the new server if it was started during installation by running `sudo systemctl stop pufferpanel`",
-    "Step3": "## Step 3\n\nReplace the contents of the PufferPanel config file on the new server with the code below\n\nThe config file is usually found at `/etc/pufferpanel/config.json`\n\n```\n{config}\n```",
-    "Step4": "## Step 4\n\nEnable and (re)start the PufferPanel service on the new server by running `sudo systemctl enable --now pufferpanel`",
-    "Step5": "### Your new node is now set up and ready to go"
+    "Step1": "## Step 1\n\nInstall daemon Cupcake Box pada server baru.",
+    "Step2": "## Step 2\n\nHentikan service daemon pada server baru jika sudah berjalan dengan `sudo systemctl stop pufferpanel`",
+    "Step3": "## Step 3\n\nGanti isi file konfigurasi node pada server baru dengan kode berikut\n\nFile konfigurasi biasanya berada di `/etc/pufferpanel/config.json`\n\n```\n{config}\n```",
+    "Step4": "## Step 4\n\nAktifkan dan jalankan kembali service daemon pada server baru dengan `sudo systemctl enable --now pufferpanel`",
+    "Step5": "### Node baru Anda sudah siap digunakan"
   },
-  "DeploymentInstruction": "Untuk menjalankan node, install PufferPanel di server baru dan taruh file configurasi di `/etc/pufferpanel/`<br/> Lalu restart server baru di PufferPanel"
+  "DeploymentInstruction": "Untuk menjalankan node, install daemon Cupcake Box di server baru dan taruh file konfigurasi di `/etc/pufferpanel/config.json`<br/>Lalu restart service pada server baru tersebut."
 }
